@@ -285,6 +285,11 @@ async function loadGallery() {
   const container =
     document.getElementById("galleryList");
 
+container.style.display = "grid";
+container.style.gridTemplateColumns = "repeat(auto-fit, minmax(250px, 1fr))";
+container.style.gap = "20px";
+container.style.width = "100%";
+
   const { data, error } =
     await sb.storage
       .from(BUCKET)
@@ -326,16 +331,27 @@ async function loadGallery() {
       .from(BUCKET)
       .getPublicUrl(file.name);
 
-    const img =
-      document.createElement("img");
+    const card = document.createElement("div");
 
-    img.src = publicData.publicUrl;
+card.style.background = "#fff";
+card.style.borderRadius = "16px";
+card.style.overflow = "hidden";
+card.style.boxShadow = "0 4px 15px rgba(0,0,0,0.12)";
+card.style.cursor = "pointer";
 
-    img.alt = "KPS Harishi School Gallery";
+const img = document.createElement("img");
 
-    img.loading = "lazy";
+img.src = publicData.publicUrl;
+img.alt = "KPS Harishi School Gallery";
+img.loading = "lazy";
 
-    container.appendChild(img);
+img.style.width = "100%";
+img.style.height = "220px";
+img.style.objectFit = "cover";
+img.style.display = "block";
+
+card.appendChild(img);
+container.appendChild(card);
 
   });
 }
