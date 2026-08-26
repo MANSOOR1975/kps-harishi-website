@@ -192,17 +192,177 @@ async function saveSettings() {
  msg("settingsMsg","School information saved.",true);
 }
 async function loadStaff() {
- const el=document.getElementById("staffList"); el.innerHTML="";
- const {data,error}=await sb.from("staff").select("*").limit(100);
- if(error) {msg("staffMsg",error.message);return;}
- if(!data.length) {el.innerHTML='<div class="card">No staff records found.</div>';return;}
- for(const row of data) {
-   const name=row.name||row.full_name||row.staff_name||row.display_name||"Staff member";
-   const role=row.designation||row.subject||row.role||row.position||"";
-   const c=document.createElement("div"); c.className="card"; c.innerHTML="<strong>"+escapeHtml(name)+"</strong><br><span class='muted'>"+escapeHtml(role)+"</span>"; el.appendChild(c);
- }
+  const el = document.getElementById("staffList");
+  el.innerHTML = "";
+
+  const { data: staff, error } = await sb
+    .from("staff")
+    .select("*")
+    .order("sort_order", { ascending: true })
+    .limit(100);
+
+  if (error) {
+    msg("staffMsg", error.message);
+    return;
+  }
+
+  // Check whether current user is an administrator
+  const { data: userData } = await sb.auth.getUser();
+  const user = userData?.user;
+
+  let isAdmin = false;
+
+  if (user) {
+    const { data: admin } = await sb
+      .from("admin_users")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    isAdmin = !!admin;
+  }
+
+  // Add Staff button
+  if (isAdmin) {
+    const addBox = document.createElement("div");
+    addBox.className = "card";
+    addBox.innerHTML = `
+      <button class="btn" onclick="addStaff()">➕ Add Staff</button>
+    `;
+    el.appendChild(addBox);
+  }
+
+  if (!staff || staff.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "card";
+    empty.textContent = "No staff records found.";
+    el.appendChild(empty);
+    return;
+  }
+
+  for (const row of staff) {
+    const name =
+      row.name ||
+      row.full_name ||
+      row.staff_name ||
+      row.display_name ||
+      "Staff member";
+
+    const role =
+      row.designation ||
+      row.subject ||
+      row.role ||
+      row.position ||
+      "";
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <strong>${escapeHtml(name)}</strong>
+      <div class="muted">${escapeHtml(role)}</div>
+      ${
+        isAdmin
+          ? `
+            <div style="margin-top:10px">
+              <button class="btn" onclick="editStaff(${row.id}, '${encodeURIComponent(name)}', '${encodeURIComponent(role)}')">
+                ✏️ Edit
+              </button>
+              <button class="btn" onclick="deleteStaff(${row.id}, '${encodeURIComponent(name)}')" style="margin-left:8px">
+                🗑️ Delete
+              </button>
+            </div>
+          `
+          : ""
+      }
+    `;
+
+    el.appendChild(card);
+  }
 }
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+async function addStaff() {
+  const name = prompt("Enter staff name:");
+  if (!name || !name.trim()) return;
+
+  const role = prompt("Enter designation / subject:");
+  if (!role || !role.trim()) return;
+
+  const { data: last } = await sb
+    .from("staff")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const nextOrder = (last?.sort_order || 0) + 1;
+
+  const { error } = await sb
+    .from("staff")
+    .insert({
+      name: name.trim(),
+      role: role.trim(),
+      sort_order: nextOrder
+    });
+
+  if (error) {
+    msg("staffMsg", error.message);
+    return;
+  }
+
+  msg("staffMsg", "Staff member added successfully.", true);
+  loadStaff();
+}
+
+
+async function editStaff(id, encodedName, encodedRole) {
+  const oldName = decodeURIComponent(encodedName);
+  const oldRole = decodeURIComponent(encodedRole);
+
+  const name = prompt("Edit staff name:", oldName);
+  if (!name || !name.trim()) return;
+
+  const role = prompt("Edit designation / subject:", oldRole);
+  if (!role || !role.trim()) return;
+
+  const { error } = await sb
+    .from("staff")
+    .update({
+      name: name.trim(),
+      role: role.trim()
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg("staffMsg", error.message);
+    return;
+  }
+
+  msg("staffMsg", "Staff member updated successfully.", true);
+  loadStaff();
+}
+
+
+async function deleteStaff(id, encodedName) {
+  const name = decodeURIComponent(encodedName);
+
+  if (!confirm(`Delete "${name}" from the staff list?`)) {
+    return;
+  }
+
+  const { error } = await sb
+    .from("staff")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    msg("staffMsg", error.message);
+    return;
+  }
+
+  msg("staffMsg", "Staff member deleted successfully.", true);
+  loadStaff();
+}
+ function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
 
 sb.auth.getSession().then(async ({data})=>{
  if(data.session) {
