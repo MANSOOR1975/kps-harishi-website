@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KPS Harishi</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  color: #17324d;
+}
+
+header {
+  background: #123b68;
+  color: white;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+header p {
+  margin: 8px 0 0;
+  font-size: 16px;
+}
+
+nav {
+  background: white;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+nav a {
+  text-decoration: none;
+  color: #123b68;
+  font-weight: bold;
+  margin: 0 14px;
+}
+
+section {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 18px;
+}
+
+.section-title {
+  text-align: center;
+  color: #123b68;
+  margin-bottom: 20px;
+}
+
+.about {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  line-height: 1.7;
+}
+
+.staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.staff-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+.staff-card h3 {
+  margin: 0 0 7px;
+  color: #123b68;
+}
+
+.staff-card p {
+  margin: 0;
+  color: #555;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.gallery img {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+
+.message {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+footer {
+  margin-top: 50px;
+  background: #123b68;
+  color: white;
+  text-align: center;
+  padding: 25px;
+}
+
+@media(max-width:600px) {
+  header h1 {
+    font-size: 25px;
+  }
+
+  nav a {
+    display: inline-block;
+    margin: 6px 8px;
+  }
+
+  .gallery img {
+    height: 200px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🏫 KPS Harishi</h1>
+  <p>Karnataka Public School, Harishi</p>
+  <p>Better Learning, Bright Future</p>
+</header>
+
+<nav>
+  <a href="#home">Home</a>
+  <a href="#staff">Staff</a>
+  <a href="#gallery">Gallery</a>
+</nav>
+
+<section id="home">
+  <h2 class="section-title">About Our School</h2>
+
+  <div class="about">
+    <h3>Welcome to KPS Harishi</h3>
+
+    <p>
+      Karnataka Public School, Harishi is committed to providing
+      quality education and creating a positive learning environment
+      for every student.
+    </p>
+
+    <p>
+      Our school focuses on academic excellence, character building,
+      creativity, sports and the overall development of students.
+    </p>
+  </div>
+</section>
+
+
+<section id="staff">
+
+  <h2 class="section-title">
+    👨‍🏫 Teaching & Administrative Staff
+  </h2>
+
+  <div id="staffList" class="staff-grid">
+    <div class="message">Loading staff...</div>
+  </div>
+
+</section>
+
+
+<section id="gallery">
+
+  <h2 class="section-title">
+    📸 School Gallery
+  </h2>
+
+  <div id="galleryList" class="gallery">
+    <div class="message">Loading gallery...</div>
+  </div>
+
+</section>
+
+
+<footer>
+  <p><strong>KPS Harishi</strong></p>
+  <p>Better Learning, Bright Future</p>
+</footer>
+
+
+<script>
+
+const SUPABASE_URL =
+  "https://exvirewxgpalwfubeovs.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_3p09-Cmv3cJG7Yh8PlyprQ_SCB9sXi6";
+
+const sb = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const BUCKET = "school-gallery";
+
+
+/* =========================
+   LOAD STAFF
+========================= */
+
+async function loadStaff() {
+
+  const container = document.getElementById("staffList");
+
+  const { data, error } = await sb
+    .from("staff")
+    .select("name, role, sort_order")
+    .order("sort_order", {
+      ascending: true
+    });
+
+  if (error) {
+
+    console.error(error);
+
+    container.innerHTML =
+      '<div class="message">Unable to load staff information.</div>';
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      '<div class="message">No staff information available.</div>';
+
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(staff => {
+
+    const card = document.createElement("div");
+
+    card.className = "staff-card";
+
+    card.innerHTML = `
+      <h3>${escapeHtml(staff.name || "")}</h3>
+      <p>${escapeHtml(staff.role || "")}</p>
+    `;
+
+    container.appendChild(card);
+
+  });
+}
+
+
+/* =========================
+   LOAD GALLERY
+========================= */
+
+async function loadGallery() {
+
+  const container =
+    document.getElementById("galleryList");
+
+  const { data, error } =
+    await sb.storage
+      .from(BUCKET)
+      .list("", {
+        limit: 100,
+        sortBy: {
+          column: "created_at",
+          order: "desc"
+        }
+      });
+
+  if (error) {
+
+    console.error(error);
+
+    container.innerHTML =
+      '<div class="message">Unable to load gallery.</div>';
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      '<div class="message">No photos available.</div>';
+
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(file => {
+
+    if (!file.name) return;
+
+    const {
+      data: publicData
+    } = sb.storage
+      .from(BUCKET)
+      .getPublicUrl(file.name);
+
+    const img =
+      document.createElement("img");
+
+    img.src = publicData.publicUrl;
+
+    img.alt = "KPS Harishi School Gallery";
+
+    img.loading = "lazy";
+
+    container.appendChild(img);
+
+  });
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadStaff();
+loadGallery();
+
+</script>
+
+</body>
+</html>
