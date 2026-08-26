@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KPS Harishi Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#17324d}
+.top{background:#123b68;color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-size:20px;font-weight:700}.tag{font-size:12px;opacity:.8}
+.layout{display:flex;min-height:calc(100vh - 64px)}.side{width:235px;background:#fff;border-right:1px solid #dde5ee;padding:16px}
+.side button{display:block;width:100%;text-align:left;border:0;background:none;padding:12px 13px;margin:4px 0;border-radius:9px;color:#28445e;cursor:pointer}
+.side button.active,.side button:hover{background:#eaf2fb;color:#0d5ea6;font-weight:600}
+.main{flex:1;padding:24px;max-width:1200px}.muted{color:#6b7d8e}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:20px 0}
+.stat,.panel,.card{background:#fff;border:1px solid #e1e8ef;border-radius:14px}
+.stat{padding:18px}.stat b{font-size:27px;display:block;margin:7px 0}
+.panel{padding:20px;margin-top:17px}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.card{padding:15px}.btn{border:0;border-radius:8px;padding:10px 15px;background:#0d67ad;color:#fff;cursor:pointer;font-weight:600}
+.btn.secondary{background:#e9f0f6;color:#24445f}.btn.danger{background:#b93434}
+input,textarea,select{width:100%;padding:10px;border:1px solid #cfd9e3;border-radius:8px;margin:6px 0 13px;font:inherit}
+label{font-weight:600;font-size:14px}.hidden{display:none}
+.login{max-width:430px;margin:9vh auto;background:#fff;padding:30px;border-radius:16px;border:1px solid #dce5ed;box-shadow:0 10px 30px #0001}
+.notice{padding:12px;border-radius:9px;background:#fff7df;border:1px solid #ead28b;margin-bottom:16px}
+.msg{padding:11px;border-radius:8px;margin:12px 0;display:none}.ok{display:block;background:#e8f7ed;color:#1d6b3a}.err{display:block;background:#fdecec;color:#9b2727}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.photo{background:#fff;border:1px solid #e1e8ef;border-radius:10px;overflow:hidden}.photo img{width:100%;height:180px;object-fit:cover;display:block}.photo div{padding:10px;font-size:13px;word-break:break-word}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.side{width:190px}.gallery{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.layout{display:block}.side{width:100%;display:flex;overflow:auto;gap:4px}.side button{white-space:nowrap;width:auto}.main{padding:16px}.grid,.cards,.gallery{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div id="loginView" class="login">
+<h1>🏫 KPS Harishi</h1><p class="muted">Administrator Login</p>
+<p class="muted">Sign in with your Supabase administrator account.</p>
+<label>Email</label><input id="email" type="email" value="ghsharishi@gmail.com">
+<label>Password</label><input id="password" type="password" placeholder="Your private password">
+<button class="btn" onclick="login()">Sign in</button>
+<div id="loginMsg" class="msg"></div>
+</div>
+
+<div id="appView" class="hidden">
+<header class="top">
+<div><div class="brand">🏫 KPS HARISHI ADMIN</div><div class="tag">Better Learning, Bright Future</div></div>
+<button class="btn secondary" onclick="logout()">Log out</button>
+</header>
+<div class="layout">
+<aside class="side">
+<button class="active" onclick="show('dashboard',this)">📊 Dashboard</button>
+<button onclick="show('gallery',this);loadGallery()">📸 Gallery</button>
+<button onclick="show('settings',this);loadSettings()">⚙️ School Information</button>
+<button onclick="show('staff',this);loadStaff()">👨‍🏫 Staff</button>
+</aside>
+
+<main class="main">
+<section id="dashboard">
+<h1>Welcome, Administrator</h1><p class="muted">Connected to the KPS Harishi Supabase project.</p>
+<div class="grid">
+<div class="stat">📸 Gallery<b id="photoCount">—</b><span class="muted">stored files</span></div>
+<div class="stat">🏫 School<b>Ready</b><span class="muted">Supabase connection</span></div>
+<div class="stat">🔐 Admin<b>Verified</b><span class="muted">current session</span></div>
+<div class="stat">🌐 Website<b>Ready</b><span class="muted">backend connected</span></div>
+</div>
+<div class="panel"><h2>Connection status</h2><p id="status">Checking...</p></div>
+</section>
+
+<section id="gallery" class="hidden">
+<div class="panel"><h2>📸 School Gallery</h2><p class="muted">Upload images to the <strong>school-gallery</strong> bucket. Only your authenticated admin account can upload/delete.</p>
+<label>Select photos</label><input id="files" type="file" accept="image/*" multiple>
+<button class="btn" onclick="uploadPhotos()">Upload Photos</button>
+<div id="galleryMsg" class="msg"></div><div id="galleryGrid" class="gallery"></div>
+</div></section>
+
+<section id="settings" class="hidden">
+<div class="panel"><h2>⚙️ School Information</h2>
+<label>School name</label><input id="school_name">
+<label>Vision</label><input id="vision">
+<label>Mission</label><textarea id="mission" rows="4"></textarea>
+<label>Phone 1</label><input id="phone_1">
+<label>Phone 2</label><input id="phone_2">
+<label>Email</label><input id="email_setting">
+<label>Address</label><textarea id="address" rows="3"></textarea>
+<label>Google Maps</label><input id="google_maps">
+<button class="btn" onclick="saveSettings()">Save School Information</button>
+<div id="settingsMsg" class="msg"></div>
+</div></section>
+
+<section id="staff" class="hidden">
+<div class="panel"><h2>👨‍🏫 Teaching & Administrative Staff</h2>
+<p class="muted">This section reads the staff table when its columns are available.</p>
+<div id="staffList" class="cards"></div><div id="staffMsg" class="msg"></div>
+</div></section>
+</main></div></div>
+
+<script>
+const SUPABASE_URL = "https://exvirewxgpalwfubeovs.supabase.co";
+const SUPABASE_KEY = "sb_publishable_3po9-Cmv3cJGJYh8PWyprQ_SCB9sXi6";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const BUCKET = "school-gallery";
+
+function msg(id,text,ok=false) {
+ const e=document.getElementById(id); e.textContent=text; e.className="msg "+(ok?"ok":"err");
+}
+function show(id,btn) {
+ document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ document.querySelectorAll(".side button").forEach(b=>b.classList.remove("active"));
+ if(btn) btn.classList.add("active");
+}
+
+async function login() {
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+ const r=await sb.auth.signInWithPassword({email,password});
+ if(r.error) {msg("loginMsg",r.error.message);return;}
+ const {data:user}=await sb.auth.getUser();
+ const {data:admin,error}=await sb.from("admin_users").select("id,email").eq("id",user.user.id).maybeSingle();
+ if(error || !admin) {
+   await sb.auth.signOut(); msg("loginMsg","This account is not registered as a KPS Harishi administrator."); return;
+ }
+ document.getElementById("loginView").classList.add("hidden");
+ document.getElementById("appView").classList.remove("hidden");
+ document.getElementById("status").textContent="Connected and authenticated as "+user.user.email;
+ loadGallery();
+}
+
+async function logout() {
+ await sb.auth.signOut();
+ document.getElementById("appView").classList.add("hidden");
+ document.getElementById("loginView").classList.remove("hidden");
+ document.getElementById("password").value="";
+}
+
+async function loadGallery() {
+ const {data,error}=await sb.storage.from(BUCKET).list("",{limit:100,sortBy:{column:"created_at",order:"desc"}});
+ if(error) {msg("galleryMsg",error.message);return;}
+ const grid=document.getElementById("galleryGrid"); grid.innerHTML="";
+ document.getElementById("photoCount").textContent=data.length;
+ for(const f of data) {
+   if(!f.name || f.name.startsWith(".")) continue;
+   const {data:url}=sb.storage.from(BUCKET).getPublicUrl(f.name);
+   const card=document.createElement("div"); card.className="photo";
+   card.innerHTML=`<img src="${url.publicUrl}" alt=""><div><strong>${escapeHtml(f.name)}</strong><br><button class="btn danger" style="margin-top:8px" onclick="deletePhoto('${encodeURIComponent(f.name)}')">Delete</button></div>`;
+   grid.appendChild(card);
+ }
+}
+async function uploadPhotos() {
+ const files=[...document.getElementById("files").files];
+ if(!files.length) {msg("galleryMsg","Please select at least one image.");return;}
+ for(const file of files) {
+   const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
+   const path=Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+safe;
+   const r=await sb.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type});
+   if(r.error) {msg("galleryMsg",r.error.message);return;}
+ }
+ msg("galleryMsg","Photos uploaded successfully.",true);
+ document.getElementById("files").value="";
+ loadGallery();
+}
+async function deletePhoto(encoded) {
+ const name=decodeURIComponent(encoded);
+ if(!confirm("Delete this photo?")) return;
+ const r=await sb.storage.from(BUCKET).remove([name]);
+ if(r.error) {msg("galleryMsg",r.error.message);return;}
+ msg("galleryMsg","Photo deleted.",true); loadGallery();
+}
+
+const keys=["school_name","vision","mission","phone_1","phone_2","email","address","google_maps"];
+async function loadSettings() {
+ const {data,error}=await sb.from("site_settings").select("setting_key,setting_value").in("setting_key",keys);
+ if(error) {msg("settingsMsg",error.message);return;}
+ for(const row of data) {
+   const id=row.setting_key==="email"?"email_setting":row.setting_key;
+   const el=document.getElementById(id); if(el) el.value=row.setting_value||"";
+ }
+}
+async function saveSettings() {
+ const values={
+  school_name:document.getElementById("school_name").value,
+  vision:document.getElementById("vision").value,
+  mission:document.getElementById("mission").value,
+  phone_1:document.getElementById("phone_1").value,
+  phone_2:document.getElementById("phone_2").value,
+  email:document.getElementById("email_setting").value,
+  address:document.getElementById("address").value,
+  google_maps:document.getElementById("google_maps").value
+ };
+ const rows=Object.entries(values).map(([setting_key,setting_value])=>({setting_key,setting_value}));
+ const {error}=await sb.from("site_settings").upsert(rows,{onConflict:"setting_key"});
+ if(error) {msg("settingsMsg",error.message);return;}
+ msg("settingsMsg","School information saved.",true);
+}
+async function loadStaff() {
+ const el=document.getElementById("staffList"); el.innerHTML="";
+ const {data,error}=await sb.from("staff").select("*").limit(100);
+ if(error) {msg("staffMsg",error.message);return;}
+ if(!data.length) {el.innerHTML='<div class="card">No staff records found.</div>';return;}
+ for(const row of data) {
+   const name=row.name||row.full_name||row.staff_name||row.display_name||"Staff member";
+   const role=row.designation||row.subject||row.role||row.position||"";
+   const c=document.createElement("div"); c.className="card"; c.innerHTML="<strong>"+escapeHtml(name)+"</strong><br><span class='muted'>"+escapeHtml(role)+"</span>"; el.appendChild(c);
+ }
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+
+sb.auth.getSession().then(async ({data})=>{
+ if(data.session) {
+   const {data:user}=await sb.auth.getUser();
+   const {data:admin}=await sb.from("admin_users").select("id").eq("id",user.user.id).maybeSingle();
+   if(admin) {
+     document.getElementById("loginView").classList.add("hidden");
+     document.getElementById("appView").classList.remove("hidden");
+     document.getElementById("status").textContent="Existing session detected.";
+     loadGallery();
+   }
+ }
+});
+</script>
+</body>
+</html>
