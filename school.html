@@ -437,23 +437,35 @@ function escapeHtml(value) {
 
 loadStaff();
 loadGallery();
+
 // Gallery Lightbox
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
 const closeBtn = document.querySelector(".lightbox .close");
 
+// Open lightbox
 document.addEventListener("click", function (e) {
     if (e.target.matches(".gallery img")) {
         lightboxImg.src = e.target.src;
         lightbox.style.display = "flex";
+
+        // Make sure close button is visible
+        closeBtn.textContent = "×";
+        closeBtn.style.display = "block";
+        closeBtn.style.visibility = "visible";
+        closeBtn.style.opacity = "1";
     }
 });
 
-closeBtn.addEventListener("click", function () {
+// Close using × button
+closeBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+
     lightbox.style.display = "none";
     lightboxImg.src = "";
 });
 
+// Close by clicking outside the image
 lightbox.addEventListener("click", function (e) {
     if (e.target === lightbox) {
         lightbox.style.display = "none";
