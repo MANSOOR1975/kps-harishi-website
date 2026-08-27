@@ -167,8 +167,8 @@ footer {
 .lightbox img {
     width: auto !important;
     height: auto !important;
-    max-width: 65vw !important;
-    max-height: 65vh !important;
+    max-width: 70vw !important;
+    max-height: 70vh !important;
     object-fit: contain !important;
     border-radius: 10px !important;
 }
@@ -469,7 +469,7 @@ closeBtn.style.cssText = `
     opacity: 1 !important;
 `;
 
-lightbox.appendChild(closeBtn);
+document.body.appendChild(closeBtn);
 
 // Open lightbox
 document.addEventListener("click", function(e) {
