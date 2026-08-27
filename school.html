@@ -167,8 +167,8 @@ footer {
 .lightbox img {
     width: auto !important;
     height: auto !important;
-    max-width: 80vw !important;
-    max-height: 75vh !important;
+    max-width: 65vw !important;
+    max-height: 65vh !important;
     object-fit: contain !important;
     border-radius: 10px !important;
 }
@@ -463,8 +463,10 @@ closeBtn.style.cssText = `
     line-height: 50px !important;
     text-align: center !important;
     cursor: pointer !important;
-    z-index: 999999 !important;
+    z-index: 2147483647 !important;
     display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 `;
 
 lightbox.appendChild(closeBtn);
