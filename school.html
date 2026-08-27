@@ -443,37 +443,55 @@ loadGallery();
 // Gallery Lightbox
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
-const closeBtn = document.querySelector(".lightbox .close");
+
+// Create a new close button
+const closeBtn = document.createElement("button");
+closeBtn.innerHTML = "&times;";
+closeBtn.setAttribute("aria-label", "Close");
+
+closeBtn.style.cssText = `
+    position: fixed !important;
+    top: 20px !important;
+    right: 25px !important;
+    width: 55px !important;
+    height: 55px !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: #000 !important;
+    color: #fff !important;
+    font-size: 42px !important;
+    line-height: 50px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    z-index: 999999 !important;
+    display: block !important;
+`;
+
+lightbox.appendChild(closeBtn);
 
 // Open lightbox
-document.addEventListener("click", function (e) {
+document.addEventListener("click", function(e) {
     if (e.target.matches(".gallery img")) {
         lightboxImg.src = e.target.src;
         lightbox.style.display = "flex";
-
-        // Make sure close button is visible
-        closeBtn.textContent = "×";
-        closeBtn.style.display = "block";
-        closeBtn.style.visibility = "visible";
-        closeBtn.style.opacity = "1";
     }
 });
 
-// Close using × button
-closeBtn.addEventListener("click", function (e) {
+// Close using X
+closeBtn.addEventListener("click", function(e) {
     e.stopPropagation();
-
     lightbox.style.display = "none";
     lightboxImg.src = "";
 });
 
 // Close by clicking outside the image
-lightbox.addEventListener("click", function (e) {
+lightbox.addEventListener("click", function(e) {
     if (e.target === lightbox) {
         lightbox.style.display = "none";
         lightboxImg.src = "";
     }
 });
+
 </script>
 
 </body>
