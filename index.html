@@ -766,7 +766,7 @@ async function addStaff() {
   // Open file chooser immediately while user activation exists.
   input.click();
 }
-async function editStaff(id, encodedName, encodedRole) {
+window.editStaff = async function(id, encodedName, encodedRole) {
   const oldName = decodeURIComponent(encodedName);
   const oldRole = decodeURIComponent(encodedRole);
 
@@ -793,7 +793,7 @@ async function editStaff(id, encodedName, encodedRole) {
   loadStaff();
 }
  
-async function deleteStaff(id, encodedName) {
+window.deleteStaff = async function(id, encodedName) {
 
   const name = decodeURIComponent(encodedName);
 
