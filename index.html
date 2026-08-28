@@ -767,31 +767,216 @@ async function addStaff() {
   input.click();
 }
 window.editStaff = async function(id, encodedName, encodedRole) {
+
   const oldName = decodeURIComponent(encodedName);
   const oldRole = decodeURIComponent(encodedRole);
 
-  const name = prompt("Enter staff name:", oldName);
-  if (!name || !name.trim()) return;
-
-  const role = prompt("Enter designation / subject:", oldRole);
-  if (!role || !role.trim()) return;
-
-  const { error } = await sb
+  // -----------------------------
+  // 1. Get current staff record
+  // -----------------------------
+  const { data: staffRow, error: fetchError } = await sb
     .from("staff")
-    .update({
-      name: name.trim(),
-      role: role.trim()
-    })
-    .eq("id", id);
+    .select("photo_url")
+    .eq("id", id)
+    .maybeSingle();
 
-  if (error) {
-    msg("staffMsg", "Update failed: " + error.message);
+  if (fetchError) {
+    msg("staffMsg", "Unable to load staff details: " + fetchError.message);
     return;
   }
 
-  msg("staffMsg", "Staff member updated successfully.", true);
+  // -----------------------------
+  // 2. Open photo selector FIRST
+  // -----------------------------
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.style.display = "none";
+
+  document.body.appendChild(input);
+
+  const selectedFile = await new Promise((resolve) => {
+
+    let finished = false;
+
+    const finish = (file) => {
+      if (finished) return;
+      finished = true;
+
+      window.removeEventListener("focus", onFocus);
+      input.remove();
+
+      resolve(file || null);
+    };
+
+    const onFocus = () => {
+      // If the user cancelled the file chooser,
+      // give the change event a moment to arrive.
+      setTimeout(() => {
+        if (!input.files || !input.files.length) {
+          finish(null);
+        }
+      }, 500);
+    };
+
+    input.addEventListener("change", () => {
+      finish(input.files?.[0] || null);
+    });
+
+    window.addEventListener("focus", onFocus);
+
+    // IMPORTANT: open immediately while user activation exists
+    input.click();
+  });
+
+  // -----------------------------
+  // 3. Ask for name
+  // -----------------------------
+  const name = prompt("Enter staff name:", oldName);
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  // -----------------------------
+  // 4. Ask for designation
+  // -----------------------------
+  const role = prompt(
+    "Enter designation / subject:",
+    oldRole
+  );
+
+  if (!role || !role.trim()) {
+    return;
+  }
+
+  let newPhotoUrl = staffRow?.photo_url || null;
+  let newPhotoPath = null;
+
+  // -----------------------------
+  // 5. Upload new photograph
+  //    only if user selected one
+  // -----------------------------
+  if (selectedFile) {
+
+    const safeName = selectedFile.name.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
+
+    newPhotoPath =
+      "staff-" +
+      Date.now() +
+      "-" +
+      safeName;
+
+    const { error: uploadError } = await sb.storage
+      .from(STAFF_BUCKET)
+      .upload(
+        newPhotoPath,
+        selectedFile,
+        {
+          upsert: false,
+          contentType: selectedFile.type
+        }
+      );
+
+    if (uploadError) {
+      msg(
+        "staffMsg",
+        "Photo upload failed: " + uploadError.message
+      );
+      return;
+    }
+
+    // Get public URL of new photograph
+    const { data: publicData } = sb.storage
+      .from(STAFF_BUCKET)
+      .getPublicUrl(newPhotoPath);
+
+    newPhotoUrl = publicData.publicUrl;
+  }
+
+  // -----------------------------
+  // 6. Update staff database row
+  // -----------------------------
+  const updateData = {
+    name: name.trim(),
+    role: role.trim()
+  };
+
+  // Only change photo_url if a new photo was selected
+  if (selectedFile) {
+    updateData.photo_url = newPhotoUrl;
+  }
+
+  const { error: updateError } = await sb
+    .from("staff")
+    .update(updateData)
+    .eq("id", id);
+
+  // -----------------------------
+  // 7. If database update failed,
+  //    remove newly uploaded photo
+  // -----------------------------
+  if (updateError) {
+
+    if (newPhotoPath) {
+      await sb.storage
+        .from(STAFF_BUCKET)
+        .remove([newPhotoPath]);
+    }
+
+    msg(
+      "staffMsg",
+      "Update failed: " + updateError.message
+    );
+
+    return;
+  }
+
+  // -----------------------------
+  // 8. Delete OLD photograph
+  //    after successful update
+  // -----------------------------
+  if (selectedFile && staffRow?.photo_url) {
+
+    const marker = "/staff-photos/";
+    const position = staffRow.photo_url.indexOf(marker);
+
+    if (position !== -1) {
+
+      const oldPhotoPath = decodeURIComponent(
+        staffRow.photo_url.substring(
+          position + marker.length
+        )
+      );
+
+      const { error: photoDeleteError } =
+        await sb.storage
+          .from(STAFF_BUCKET)
+          .remove([oldPhotoPath]);
+
+      if (photoDeleteError) {
+        console.log(
+          "Old photo deletion warning:",
+          photoDeleteError.message
+        );
+      }
+    }
+  }
+
+  // -----------------------------
+  // 9. Success
+  // -----------------------------
+  msg(
+    "staffMsg",
+    "Staff member updated successfully.",
+    true
+  );
+
   loadStaff();
-}
+};
  
 window.deleteStaff = async function(id, encodedName) {
 
