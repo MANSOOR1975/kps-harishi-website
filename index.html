@@ -766,6 +766,32 @@ async function addStaff() {
   // Open file chooser immediately while user activation exists.
   input.click();
 }
+async function editStaff(id, encodedName, encodedRole) {
+  const oldName = decodeURIComponent(encodedName);
+  const oldRole = decodeURIComponent(encodedRole);
+
+  const name = prompt("Enter staff name:", oldName);
+  if (!name || !name.trim()) return;
+
+  const role = prompt("Enter designation / subject:", oldRole);
+  if (!role || !role.trim()) return;
+
+  const { error } = await sb
+    .from("staff")
+    .update({
+      name: name.trim(),
+      role: role.trim()
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg("staffMsg", "Update failed: " + error.message);
+    return;
+  }
+
+  msg("staffMsg", "Staff member updated successfully.", true);
+  loadStaff();
+}
  
 async function deleteStaff(id, encodedName) {
 
