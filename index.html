@@ -481,110 +481,50 @@ async function loadStaff() {
 }
 
 async function addStaff() {
+    const name = prompt("Enter staff name:");
 
-  const name = prompt("Enter staff name:");
-
-  if (!name || !name.trim()) {
-    return;
-  }
-
-  const role = prompt("Enter designation / subject:");
-
-  if (!role || !role.trim()) {
-    return;
-  }
-
-  // Create a temporary file selector
-  const input = document.createElement("input");
-
-  input.type = "file";
-  input.accept = "image/*";
-
-  input.onchange = async function () {
-
-    const file = input.files[0];
-
-    if (!file) {
-      return;
+    if (!name || !name.trim()) {
+        return;
     }
 
-    // Create a safe unique filename
-    const safeName = file.name.replace(
-      /[^a-zA-Z0-9._-]/g,
-      "_"
-    );
+    const role = prompt("Enter designation / subject:");
 
-    const filePath =
-      "staff-" +
-      Date.now() +
-      "-" +
-      safeName;
-
-    // Upload photograph
-    const { error: uploadError } = await sb.storage
-      .from("staff-photos")
-      .upload(filePath, file, {
-        upsert: false,
-        contentType: file.type
-      });
-
-    if (uploadError) {
-      msg("staffMsg", uploadError.message);
-      return;
+    if (!role || !role.trim()) {
+        return;
     }
-
-    // Get public URL
-    const { data: publicData } = sb.storage
-      .from("staff-photos")
-      .getPublicUrl(filePath);
-
-    const photoUrl = publicData?.publicUrl || null;
 
     // Find next sort order
     const { data: last } = await sb
-      .from("staff")
-      .select("sort_order")
-      .order("sort_order", {
-        ascending: false
-      })
-      .limit(1)
-      .maybeSingle();
+        .from("staff")
+        .select("sort_order")
+        .order("sort_order", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    const nextOrder =
-      (last?.sort_order || 0) + 1;
+    const nextOrder = (last?.sort_order || 0) + 1;
 
-    // Insert staff record
+    // Insert staff record without photograph
     const { error } = await sb
-      .from("staff")
-      .insert({
-        name: name.trim(),
-        role: role.trim(),
-        sort_order: nextOrder,
-        photo_url: photoUrl
-      });
+        .from("staff")
+        .insert({
+            name: name.trim(),
+            role: role.trim(),
+            sort_order: nextOrder,
+            photo_url: null
+        });
 
     if (error) {
-
-      // Remove uploaded photo if database insert fails
-      await sb.storage
-        .from("staff-photos")
-        .remove([filePath]);
-
-      msg("staffMsg", error.message);
-      return;
+        msg("staffMsg", error.message);
+        return;
     }
 
     msg(
-      "staffMsg",
-      "Staff member added successfully.",
-      true
+        "staffMsg",
+        "Staff member added successfully.",
+        true
     );
 
     loadStaff();
-  };
-
-  // Open photograph selector
-  // input.click();
 }
 
 async function deleteStaff(id, encodedName) {
