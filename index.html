@@ -623,7 +623,150 @@ async function addStaff() {
   // Open file chooser immediately while user activation exists.
   input.click();
 }
+async function addStaff() {
 
+  // Create photograph selector FIRST.
+  // It must be opened directly from the Add Staff button click.
+  const input = document.createElement("input");
+
+  input.type = "file";
+  input.accept = "image/*";
+
+  input.onchange = async function () {
+
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Now ask for staff details
+    const name = prompt("Enter staff name:");
+
+    if (!name || !name.trim()) {
+      return;
+    }
+
+    const role = prompt("Enter designation / subject:");
+
+    if (!role || !role.trim()) {
+      return;
+    }
+
+    // Create a safe unique filename
+    const safeName = file.name.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
+
+    const filePath =
+      "staff-" +
+      Date.now() +
+      "-" +
+      safeName;
+
+    // Upload photograph
+    const { error: uploadError } =
+      await sb.storage
+        .from(STAFF_BUCKET)
+        .upload(
+          filePath,
+          file,
+          {
+            upsert: false,
+            contentType: file.type
+          }
+        );
+
+    if (uploadError) {
+
+      msg(
+        "staffMsg",
+        "Photo upload failed: " +
+        uploadError.message
+      );
+
+      return;
+    }
+
+    // Get public URL
+    const { data: publicData } =
+      sb.storage
+        .from(STAFF_BUCKET)
+        .getPublicUrl(filePath);
+
+    const photoUrl =
+      publicData?.publicUrl || null;
+
+    // Find next sort order
+    const { data: last, error: sortError } =
+      await sb
+        .from("staff")
+        .select("sort_order")
+        .order("sort_order", {
+          ascending: false
+        })
+        .limit(1)
+        .maybeSingle();
+
+    if (sortError) {
+
+      await sb.storage
+        .from(STAFF_BUCKET)
+        .remove([filePath]);
+
+      msg(
+        "staffMsg",
+        sortError.message
+      );
+
+      return;
+    }
+
+    const nextOrder =
+      (last?.sort_order || 0) + 1;
+
+    // Insert staff record
+    const { error } =
+      await sb
+        .from("staff")
+        .insert({
+          name: name.trim(),
+          role: role.trim(),
+          sort_order: nextOrder,
+          photo_url: photoUrl
+        });
+
+    if (error) {
+
+      // Remove uploaded photo if database insert fails
+      await sb.storage
+        .from(STAFF_BUCKET)
+        .remove([filePath]);
+
+      msg(
+        "staffMsg",
+        error.message
+      );
+
+      return;
+    }
+
+    msg(
+      "staffMsg",
+      "Staff member added successfully.",
+      true
+    );
+
+    // Reload staff list
+    loadStaff();
+  };
+
+  // IMPORTANT:
+  // Open file chooser immediately while user activation exists.
+  input.click();
+}
+ 
 async function deleteStaff(id, encodedName) {
 
   const name = decodeURIComponent(encodedName);
