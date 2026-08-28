@@ -481,50 +481,113 @@ async function loadStaff() {
 }
 
 async function addStaff() {
-    const name = prompt("Enter staff name:");
+  const name = prompt("Enter staff name:");
 
-    if (!name || !name.trim()) {
-        return;
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const role = prompt("Enter designation / subject:");
+
+  if (!role || !role.trim()) {
+    return;
+  }
+
+  // Create photograph selector
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+
+  input.onchange = async function () {
+    const file = input.files[0];
+
+    if (!file) {
+      return;
     }
 
-    const role = prompt("Enter designation / subject:");
+    // Create a safe unique filename
+    const safeName = file.name.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
 
-    if (!role || !role.trim()) {
-        return;
+    const filePath =
+      "staff-" +
+      Date.now() +
+      "-" +
+      safeName;
+
+    // Upload photograph
+    const { error: uploadError } = await sb.storage
+      .from(STAFF_BUCKET)
+      .upload(filePath, file, {
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (uploadError) {
+      msg("staffMsg", uploadError.message);
+      return;
     }
+
+    // Get public photograph URL
+    const { data: publicData } = sb.storage
+      .from(STAFF_BUCKET)
+      .getPublicUrl(filePath);
+
+    const photoUrl = publicData?.publicUrl || null;
 
     // Find next sort order
-    const { data: last } = await sb
-        .from("staff")
-        .select("sort_order")
-        .order("sort_order", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    const { data: last, error: sortError } = await sb
+      .from("staff")
+      .select("sort_order")
+      .order("sort_order", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (sortError) {
+      // Remove uploaded photograph if database operation cannot continue
+      await sb.storage
+        .from(STAFF_BUCKET)
+        .remove([filePath]);
+
+      msg("staffMsg", sortError.message);
+      return;
+    }
 
     const nextOrder = (last?.sort_order || 0) + 1;
 
-    // Insert staff record without photograph
+    // Insert staff record
     const { error } = await sb
-        .from("staff")
-        .insert({
-            name: name.trim(),
-            role: role.trim(),
-            sort_order: nextOrder,
-            photo_url: null
-        });
+      .from("staff")
+      .insert({
+        name: name.trim(),
+        role: role.trim(),
+        sort_order: nextOrder,
+        photo_url: photoUrl
+      });
 
     if (error) {
-        msg("staffMsg", error.message);
-        return;
+      // Remove uploaded photograph if database insert fails
+      await sb.storage
+        .from(STAFF_BUCKET)
+        .remove([filePath]);
+
+      msg("staffMsg", error.message);
+      return;
     }
 
     msg(
-        "staffMsg",
-        "Staff member added successfully.",
-        true
+      "staffMsg",
+      "Staff member added successfully.",
+      true
     );
 
     loadStaff();
+  };
+
+  // Open photograph selector
+  input.click();
 }
 
 async function deleteStaff(id, encodedName) {
