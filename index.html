@@ -5,7 +5,32 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KPS Harishi Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
+ <style>
+ .staff-photo{
+  width:120px;
+  height:120px;
+  object-fit:cover;
+  border-radius:12px;
+  display:block;
+  margin:0 auto 12px;
+  border:1px solid #ddd;
+}
+
+.staff-photo-placeholder{
+  width:120px;
+  height:120px;
+  border-radius:12px;
+  margin:0 auto 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#eef2f7;
+  font-size:42px;
+}
+
+.staff-card{
+  text-align:center;
+}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#17324d}
 .top{background:#123b68;color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
 .brand{font-size:20px;font-weight:700}.tag{font-size:12px;opacity:.8}
@@ -98,6 +123,7 @@ const SUPABASE_URL = "https://exvirewxgpalwfubeovs.supabase.co";
 const SUPABASE_KEY = "sb_publishable_3po9-Cmv3cJGJYh8PWyprQ_SCB9sXi6";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const BUCKET = "school-gallery";
+const STAFF_BUCKET = "staff-photos";
 
 function msg(id,text,ok=false) {
  const e=document.getElementById(id); e.textContent=text; e.className="msg "+(ok?"ok":"err");
@@ -222,13 +248,17 @@ async function loadStaff() {
     isAdmin = !!admin;
   }
 
-  // Add Staff button
+  // Add Staff button - only for administrators
   if (isAdmin) {
     const addBox = document.createElement("div");
     addBox.className = "card";
+
     addBox.innerHTML = `
-      <button class="btn" onclick="addStaff()">➕ Add Staff</button>
+      <button class="btn" onclick="addStaff()">
+        ➕ Add Staff
+      </button>
     `;
+
     el.appendChild(addBox);
   }
 
@@ -241,6 +271,7 @@ async function loadStaff() {
   }
 
   for (const row of staff) {
+
     const name =
       row.name ||
       row.full_name ||
@@ -255,22 +286,59 @@ async function loadStaff() {
       row.position ||
       "";
 
+    // Staff photograph
+    let photoHtml = `
+      <div class="staff-photo-placeholder">
+        👤
+      </div>
+    `;
+
+    if (row.photo_url) {
+      photoHtml = `
+        <img
+          class="staff-photo"
+          src="${escapeHtml(row.photo_url)}"
+          alt="${escapeHtml(name)}"
+        >
+      `;
+    }
+
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = "card staff-card";
 
     card.innerHTML = `
+      ${photoHtml}
+
       <strong>${escapeHtml(name)}</strong>
-      <div class="muted">${escapeHtml(role)}</div>
+
+      <div class="muted">
+        ${escapeHtml(role)}
+      </div>
+
       ${
         isAdmin
           ? `
             <div style="margin-top:10px">
-              <button class="btn" onclick="editStaff(${row.id}, '${encodeURIComponent(name)}', '${encodeURIComponent(role)}')">
+
+              <button
+                class="btn"
+                onclick="editStaff(
+                  ${row.id},
+                  '${encodeURIComponent(name)}',
+                  '${encodeURIComponent(role)}'
+                )">
                 ✏️ Edit
               </button>
-              <button class="btn" onclick="deleteStaff(${row.id}, '${encodeURIComponent(name)}')" style="margin-left:8px">
+
+              <button
+                class="btn danger"
+                onclick="deleteStaff(
+                  ${row.id},
+                  '${encodeURIComponent(name)}'
+                )">
                 🗑️ Delete
               </button>
+
             </div>
           `
           : ""
@@ -280,75 +348,271 @@ async function loadStaff() {
     el.appendChild(card);
   }
 }
+async function loadStaff() {
+  const el = document.getElementById("staffList");
+  el.innerHTML = "";
+
+  const { data: staff, error } = await sb
+    .from("staff")
+    .select("*")
+    .order("sort_order", { ascending: true })
+    .limit(100);
+
+  if (error) {
+    msg("staffMsg", error.message);
+    return;
+  }
+
+  // Check whether current user is an administrator
+  const { data: userData } = await sb.auth.getUser();
+  const user = userData?.user;
+
+  let isAdmin = false;
+
+  if (user) {
+    const { data: admin } = await sb
+      .from("admin_users")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    isAdmin = !!admin;
+  }
+
+  // Add Staff button - only for administrators
+  if (isAdmin) {
+    const addBox = document.createElement("div");
+    addBox.className = "card";
+
+    addBox.innerHTML = `
+      <button class="btn" onclick="addStaff()">
+        ➕ Add Staff
+      </button>
+    `;
+
+    el.appendChild(addBox);
+  }
+
+  if (!staff || staff.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "card";
+    empty.textContent = "No staff records found.";
+    el.appendChild(empty);
+    return;
+  }
+
+  for (const row of staff) {
+
+    const name =
+      row.name ||
+      row.full_name ||
+      row.staff_name ||
+      row.display_name ||
+      "Staff member";
+
+    const role =
+      row.designation ||
+      row.subject ||
+      row.role ||
+      row.position ||
+      "";
+
+    // Staff photograph
+    let photoHtml = `
+      <div class="staff-photo-placeholder">
+        👤
+      </div>
+    `;
+
+    if (row.photo_url) {
+      photoHtml = `
+        <img
+          class="staff-photo"
+          src="${escapeHtml(row.photo_url)}"
+          alt="${escapeHtml(name)}"
+        >
+      `;
+    }
+
+    const card = document.createElement("div");
+    card.className = "card staff-card";
+
+    card.innerHTML = `
+      ${photoHtml}
+
+      <strong>${escapeHtml(name)}</strong>
+
+      <div class="muted">
+        ${escapeHtml(role)}
+      </div>
+
+      ${
+        isAdmin
+          ? `
+            <div style="margin-top:10px">
+
+              <button
+                class="btn"
+                onclick="editStaff(
+                  ${row.id},
+                  '${encodeURIComponent(name)}',
+                  '${encodeURIComponent(role)}'
+                )">
+                ✏️ Edit
+              </button>
+
+              <button
+                class="btn danger"
+                onclick="deleteStaff(
+                  ${row.id},
+                  '${encodeURIComponent(name)}'
+                )">
+                🗑️ Delete
+              </button>
+
+            </div>
+          `
+          : ""
+      }
+    `;
+
+    el.appendChild(card);
+  }
+}
+
 async function addStaff() {
+
   const name = prompt("Enter staff name:");
-  if (!name || !name.trim()) return;
+
+  if (!name || !name.trim()) {
+    return;
+  }
 
   const role = prompt("Enter designation / subject:");
-  if (!role || !role.trim()) return;
 
-  const { data: last } = await sb
-    .from("staff")
-    .select("sort_order")
-    .order("sort_order", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const nextOrder = (last?.sort_order || 0) + 1;
-
-  const { error } = await sb
-    .from("staff")
-    .insert({
-      name: name.trim(),
-      role: role.trim(),
-      sort_order: nextOrder
-    });
-
-  if (error) {
-    msg("staffMsg", error.message);
+  if (!role || !role.trim()) {
     return;
   }
 
-  msg("staffMsg", "Staff member added successfully.", true);
-  loadStaff();
+  // Create a temporary file selector
+  const input = document.createElement("input");
+
+  input.type = "file";
+  input.accept = "image/*";
+
+  input.onchange = async function () {
+
+    const file = input.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Create a safe unique filename
+    const safeName = file.name.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
+
+    const filePath =
+      "staff-" +
+      Date.now() +
+      "-" +
+      safeName;
+
+    // Upload photograph
+    const { error: uploadError } = await sb.storage
+      .from("staff-photos")
+      .upload(filePath, file, {
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (uploadError) {
+      msg("staffMsg", uploadError.message);
+      return;
+    }
+
+    // Get public URL
+    const { data: publicData } = sb.storage
+      .from("staff-photos")
+      .getPublicUrl(filePath);
+
+    const photoUrl = publicData?.publicUrl || null;
+
+    // Find next sort order
+    const { data: last } = await sb
+      .from("staff")
+      .select("sort_order")
+      .order("sort_order", {
+        ascending: false
+      })
+      .limit(1)
+      .maybeSingle();
+
+    const nextOrder =
+      (last?.sort_order || 0) + 1;
+
+    // Insert staff record
+    const { error } = await sb
+      .from("staff")
+      .insert({
+        name: name.trim(),
+        role: role.trim(),
+        sort_order: nextOrder,
+        photo_url: photoUrl
+      });
+
+    if (error) {
+
+      // Remove uploaded photo if database insert fails
+      await sb.storage
+        .from("staff-photos")
+        .remove([filePath]);
+
+      msg("staffMsg", error.message);
+      return;
+    }
+
+    msg(
+      "staffMsg",
+      "Staff member added successfully.",
+      true
+    );
+
+    loadStaff();
+  };
+
+  // Open photograph selector
+  input.click();
 }
-
-
-async function editStaff(id, encodedName, encodedRole) {
-  const oldName = decodeURIComponent(encodedName);
-  const oldRole = decodeURIComponent(encodedRole);
-
-  const name = prompt("Edit staff name:", oldName);
-  if (!name || !name.trim()) return;
-
-  const role = prompt("Edit designation / subject:", oldRole);
-  if (!role || !role.trim()) return;
-
-  const { error } = await sb
-    .from("staff")
-    .update({
-      name: name.trim(),
-      role: role.trim()
-    })
-    .eq("id", id);
-
-  if (error) {
-    msg("staffMsg", error.message);
-    return;
-  }
-
-  msg("staffMsg", "Staff member updated successfully.", true);
-  loadStaff();
-}
-
 
 async function deleteStaff(id, encodedName) {
+
   const name = decodeURIComponent(encodedName);
 
-  if (!confirm(`Delete "${name}" from the staff list?`)) {
+  if (
+    !confirm(
+      `Delete "${name}" from the staff list?`
+    )
+  ) {
     return;
   }
 
+  // Get photograph URL before deleting record
+  const { data: staffRow, error: fetchError } =
+    await sb
+      .from("staff")
+      .select("photo_url")
+      .eq("id", id)
+      .maybeSingle();
+
+  if (fetchError) {
+    msg("staffMsg", fetchError.message);
+    return;
+  }
+
+  // Delete staff database record
   const { error } = await sb
     .from("staff")
     .delete()
@@ -359,7 +623,43 @@ async function deleteStaff(id, encodedName) {
     return;
   }
 
-  msg("staffMsg", "Staff member deleted successfully.", true);
+  // Delete photograph from storage
+  if (staffRow?.photo_url) {
+
+    const marker = "/staff-photos/";
+
+    const position =
+      staffRow.photo_url.indexOf(marker);
+
+    if (position !== -1) {
+
+      const photoPath =
+        decodeURIComponent(
+          staffRow.photo_url.substring(
+            position + marker.length
+          )
+        );
+
+      const { error: photoError } =
+        await sb.storage
+          .from("staff-photos")
+          .remove([photoPath]);
+
+      if (photoError) {
+        console.log(
+          "Photo deletion warning:",
+          photoError.message
+        );
+      }
+    }
+  }
+
+  msg(
+    "staffMsg",
+    "Staff member deleted successfully.",
+    true
+  );
+
   loadStaff();
 }
  function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
