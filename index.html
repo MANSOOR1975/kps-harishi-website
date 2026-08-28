@@ -791,7 +791,10 @@ window.editStaff = async function(id, encodedName, encodedRole) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
-  input.style.display = "none";
+ 
+  input.style.position = "fixed";
+  input.style.left = "-9999px";
+  input.style.opacity = "0";
 
   document.body.appendChild(input);
 
