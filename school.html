@@ -202,20 +202,21 @@ footer {
     padding: 12px 0;
 }
 
-.announcement-ticker {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    background: #fff;
-    border-radius: 12px;
-    padding: 14px 0;
-}
-
 .announcement-track {
-    display: flex;
-    width: max-content;
+    display: flex !important;
+    flex-direction: row !important;
+    width: max-content !important;
     animation: announcementMove 25s linear infinite !important;
     will-change: transform;
+}
+
+.announcement-group {
+    display: flex !important;
+    flex-direction: row !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    flex-shrink: 0 !important;
+    align-items: center;
 }
 
 .announcement-group {
