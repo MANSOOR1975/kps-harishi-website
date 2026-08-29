@@ -76,6 +76,7 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <button onclick="show('gallery',this);loadGallery()">📸 Gallery</button>
 <button onclick="show('settings',this);loadSettings()">⚙️ School Information</button>
 <button onclick="show('staff',this);loadStaff()">👨‍🏫 Staff</button>
+<button onclick="show('announcements',this);loadAnnouncements()">📢 Announcements</button>
 </aside>
 
 <main class="main">
@@ -116,6 +117,32 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <p class="muted">This section reads the staff table when its columns are available.</p>
 <div id="staffList" class="cards"></div><div id="staffMsg" class="msg"></div>
 </div></section>
+
+<section id="announcements" class="hidden">
+<div class="panel">
+<h2>📢 Announcements</h2>
+<p class="muted">Add and manage school announcements.</p>
+
+<label>Announcement Title</label>
+<input id="announcementTitle" placeholder="Enter announcement title">
+
+<label>Announcement Date</label>
+<input id="announcementDate" type="date">
+
+<label>Announcement Details</label>
+<textarea id="announcementText" rows="5" placeholder="Enter announcement details"></textarea>
+
+<button class="btn" onclick="addAnnouncement()">➕ Add Announcement</button>
+
+<div id="announcementMsg" class="msg"></div>
+
+<hr>
+
+<h3>Published Announcements</h3>
+<div id="announcementList"></div>
+
+</div>
+</section> 
 </main></div></div>
 
 <script>
@@ -1070,6 +1097,219 @@ sb.auth.getSession().then(async ({data})=>{
    }
  }
 });
+ window.loadAnnouncements = async function() {
+
+  const { data, error } = await sb
+    .from("announcements")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const list = document.getElementById("announcementList");
+
+  if (error) {
+    list.innerHTML = "";
+    msg("announcementMsg", "Failed to load announcements: " + error.message);
+    return;
+  }
+
+  list.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p class="muted">No announcements available.</p>';
+    return;
+  }
+
+  data.forEach(row => {
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    const date = row.created_at
+      ? new Date(row.created_at).toLocaleDateString("en-IN")
+      : "";
+
+    div.innerHTML = `
+      <h3>📢 ${escapeHtml(row.title)}</h3>
+
+      <p class="muted">
+        ${date}
+        ${row.published ? " • Published" : " • Draft"}
+      </p>
+
+      <p>${escapeHtml(row.content)}</p>
+
+      <button class="btn"
+        onclick="editAnnouncement(
+          ${row.id},
+          '${encodeURIComponent(row.title)}',
+          '${encodeURIComponent(row.content)}'
+        )">
+        ✏️ Edit
+      </button>
+
+      <button class="btn danger"
+        onclick="deleteAnnouncement(
+          ${row.id},
+          '${encodeURIComponent(row.title)}'
+        )">
+        🗑️ Delete
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+};
+
+
+window.addAnnouncement = async function() {
+
+  const title =
+    document.getElementById("announcementTitle").value.trim();
+
+  const content =
+    document.getElementById("announcementText").value.trim();
+
+  const date =
+    document.getElementById("announcementDate").value;
+
+  if (!title || !content) {
+    msg(
+      "announcementMsg",
+      "Please enter the announcement title and details."
+    );
+    return;
+  }
+
+  let createdAt = new Date().toISOString();
+
+  if (date) {
+    createdAt = new Date(date + "T00:00:00").toISOString();
+  }
+
+  const { error } = await sb
+    .from("announcements")
+    .insert({
+      title: title,
+      content: content,
+      published: true,
+      created_at: createdAt
+    });
+
+  if (error) {
+    msg(
+      "announcementMsg",
+      "Failed to add announcement: " + error.message
+    );
+    return;
+  }
+
+  msg(
+    "announcementMsg",
+    "Announcement added successfully.",
+    true
+  );
+
+  document.getElementById("announcementTitle").value = "";
+  document.getElementById("announcementDate").value = "";
+  document.getElementById("announcementText").value = "";
+
+  loadAnnouncements();
+};
+
+
+window.editAnnouncement = async function(
+  id,
+  encodedTitle,
+  encodedContent
+) {
+
+  const oldTitle = decodeURIComponent(encodedTitle);
+  const oldContent = decodeURIComponent(encodedContent);
+
+  const title = prompt(
+    "Enter announcement title:",
+    oldTitle
+  );
+
+  if (!title || !title.trim()) return;
+
+  const content = prompt(
+    "Enter announcement details:",
+    oldContent
+  );
+
+  if (!content || !content.trim()) return;
+
+  const { error } = await sb
+    .from("announcements")
+    .update({
+      title: title.trim(),
+      content: content.trim()
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg(
+      "announcementMsg",
+      "Update failed: " + error.message
+    );
+    return;
+  }
+
+  msg(
+    "announcementMsg",
+    "Announcement updated successfully.",
+    true
+  );
+
+  loadAnnouncements();
+};
+
+
+window.deleteAnnouncement = async function(
+  id,
+  encodedTitle
+) {
+
+  const title = decodeURIComponent(encodedTitle);
+
+  if (!confirm(
+    Delete "${title}" from announcements?
+  )) {
+    return;
+  }
+
+  const { error } = await sb
+    .from("announcements")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    msg(
+      "announcementMsg",
+      "Delete failed: " + error.message
+    );
+    return;
+  }
+
+  msg(
+    "announcementMsg",
+    "Announcement deleted successfully.",
+    true
+  );
+
+  loadAnnouncements();
+};
+
+
+function escapeHtml(text) {
+
+  const div = document.createElement("div");
+
+  div.textContent = text || "";
+
+  return div.innerHTML;
+}
 </script>
 </body>
 </html>
