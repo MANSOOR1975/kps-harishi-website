@@ -226,7 +226,16 @@ footer {
     </p>
   </div>
 </section>
+  
+<section id="announcements">
 
+    <h2 class="section-title">📢 Announcements</h2>
+
+    <div id="announcementList">
+        <div class="message">Loading announcements...</div>
+    </div>
+
+</section>
 
 <section id="staff">
 
@@ -335,6 +344,58 @@ async function loadStaff() {
   });
 }
 
+  async function loadAnnouncements() {
+
+    const container =
+        document.getElementById("announcementList");
+
+    const { data, error } = await sb
+        .from("announcements")
+        .select("title, date, details")
+        .order("date", {
+            ascending: false
+        });
+
+    if (error) {
+
+        console.error(error);
+
+        container.innerHTML =
+            '<div class="message">Unable to load announcements.</div>';
+
+        return;
+    }
+
+    if (!data || data.length === 0) {
+
+        container.innerHTML =
+            '<div class="message">No announcements available.</div>';
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    data.forEach(announcement => {
+
+        const card = document.createElement("div");
+
+        card.className = "announcement-card";
+
+        card.innerHTML = `
+            <h3>📢 ${escapeHtml(announcement.title || "")}</h3>
+            <p class="announcement-date">
+                ${escapeHtml(announcement.date || "")}
+            </p>
+            <p>
+                ${escapeHtml(announcement.details || "")}
+            </p>
+        `;
+
+        container.appendChild(card);
+
+    });
+}
 
 /* =========================
    LOAD GALLERY
@@ -439,6 +500,7 @@ function escapeHtml(value) {
 
 loadStaff();
 loadGallery();
+loadAnnouncements();
 
 // Gallery Lightbox
 const lightbox = document.getElementById("lightbox");
