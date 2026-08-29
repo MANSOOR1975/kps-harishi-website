@@ -351,8 +351,9 @@ async function loadStaff() {
 
     const { data, error } = await sb
         .from("announcements")
-        .select("title, date, details")
-        .order("date", {
+        .select("title, content, published, created_at")
+        .eq("published", true)
+        .order("created_at", {
             ascending: false
         });
 
@@ -382,18 +383,23 @@ async function loadStaff() {
 
         card.className = "announcement-card";
 
+        const date = announcement.created_at
+            ? new Date(announcement.created_at).toLocaleDateString("en-IN")
+            : "";
+
         card.innerHTML = `
             <h3>📢 ${escapeHtml(announcement.title || "")}</h3>
+
             <p class="announcement-date">
-                ${escapeHtml(announcement.date || "")}
+                ${escapeHtml(date)}
             </p>
+
             <p>
-                ${escapeHtml(announcement.details || "")}
+                ${escapeHtml(announcement.content || "")}
             </p>
         `;
 
         container.appendChild(card);
-
     });
 }
 
