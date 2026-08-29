@@ -191,6 +191,102 @@ footer {
     visibility: visible !important;
     opacity: 1 !important;
 }
+  /* =====================================
+   ANNOUNCEMENT MOVING TICKER
+   ===================================== */
+
+#announcementList {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 12px 0;
+}
+
+.announcement-ticker {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 0;
+}
+
+.announcement-track {
+    display: flex;
+    width: max-content;
+    animation: announcementScroll 28s linear infinite;
+}
+
+.announcement-group {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.announcement-item {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0 35px;
+    font-size: 17px;
+}
+
+.announcement-icon {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.announcement-item strong {
+    font-weight: 700;
+    margin-right: 12px;
+}
+
+.announcement-date {
+    font-size: 14px;
+    margin-right: 15px;
+    opacity: 0.7;
+}
+
+.announcement-content {
+    font-weight: 500;
+}
+
+/* Continuous right-to-left movement */
+@keyframes announcementScroll {
+
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* Pause when mouse is over announcement */
+.announcement-ticker:hover .announcement-track {
+    animation-play-state: paused;
+}
+
+
+/* Mobile */
+@media (max-width: 600px) {
+
+    .announcement-item {
+        font-size: 15px;
+        padding: 0 25px;
+    }
+
+    .announcement-icon {
+        font-size: 18px;
+    }
+
+    .announcement-date {
+        font-size: 12px;
+    }
+
+}
 </style>
 </head>
 
@@ -358,7 +454,6 @@ async function loadStaff() {
         });
 
     if (error) {
-
         console.error(error);
 
         container.innerHTML =
@@ -375,34 +470,66 @@ async function loadStaff() {
         return;
     }
 
-    container.innerHTML = "";
+    /*
+     * Create announcement items
+     */
+    const items = data.map(announcement => {
 
-    data.forEach(announcement => {
+        const title =
+            escapeHtml(announcement.title || "");
 
-        const card = document.createElement("div");
+        const content =
+            escapeHtml(announcement.content || "");
 
-        card.className = "announcement-card";
+        const date =
+            announcement.created_at
+                ? new Date(announcement.created_at)
+                    .toLocaleDateString("en-IN")
+                : "";
 
-        const date = announcement.created_at
-            ? new Date(announcement.created_at).toLocaleDateString("en-IN")
-            : "";
+        return `
+            <div class="announcement-item">
 
-        card.innerHTML = `
-            <h3>📢 ${escapeHtml(announcement.title || "")}</h3>
+                <span class="announcement-icon">📢</span>
 
-            <p class="announcement-date">
-                ${escapeHtml(date)}
-            </p>
+                <strong>${title}</strong>
 
-            <p>
-                ${escapeHtml(announcement.content || "")}
-            </p>
+                <span class="announcement-date">
+                    ${date}
+                </span>
+
+                <span class="announcement-content">
+                    ${content}
+                </span>
+
+            </div>
         `;
+    }).join("");
 
-        container.appendChild(card);
-    });
+    /*
+     * Duplicate the group so the ticker
+     * can move continuously without a jump.
+     */
+    container.innerHTML = `
+        <div class="announcement-ticker">
+
+            <div class="announcement-track">
+
+                <div class="announcement-group">
+                    ${items}
+                </div>
+
+                <div class="announcement-group" aria-hidden="true">
+                    ${items}
+                </div>
+
+            </div>
+
+        </div>
+    `;
 }
 
+  
 /* =========================
    LOAD GALLERY
 ========================= */
