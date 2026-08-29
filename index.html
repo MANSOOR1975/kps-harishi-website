@@ -1273,7 +1273,7 @@ window.deleteAnnouncement = async function(
 
   const title = decodeURIComponent(encodedTitle);
 
-  if (!confirm('Delete "${title}" from announcements?')) {
+  if (!confirm(`Delete "${title}" from announcements?`)) {
     return;
   }
 
