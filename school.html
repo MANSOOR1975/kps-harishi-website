@@ -214,7 +214,8 @@ footer {
 .announcement-track {
     display: flex;
     width: max-content;
-    animation: announcementScroll 28s linear infinite;
+    animation: announcementMove 25s linear infinite !important;
+    will-change: transform;
 }
 
 .announcement-group {
@@ -224,12 +225,21 @@ footer {
 }
 
 .announcement-item {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    flex-shrink: 0;
     white-space: nowrap;
-    padding: 0 35px;
-    font-size: 17px;
+    flex-shrink: 0;
+    padding: 0 30px;
+}
+
+@keyframes announcementMove {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
 }
 
 .announcement-icon {
@@ -252,17 +262,7 @@ footer {
     font-weight: 500;
 }
 
-/* Continuous right-to-left movement */
-@keyframes announcementScroll {
 
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
 
 /* Pause when mouse is over announcement */
 .announcement-ticker:hover .announcement-track {
