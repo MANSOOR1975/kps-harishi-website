@@ -310,27 +310,43 @@ footer {
     align-items: center !important;
 }
 
-  staff-photo {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
+  .staff-card img.staff-photo {
+    width: 120px !important;
+    height: 120px !important;
+    max-width: 120px !important;
+    max-height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
+    object-fit: cover !important;
     border-radius: 12px;
-    display: block;
+    display: block !important;
     margin: 0 auto 12px;
     border: 1px solid #ddd;
 }
 
 .staff-photo-placeholder {
-    width: 120px;
-    height: 120px;
+    width: 120px !important;
+    height: 120px !important;
+    max-width: 120px !important;
+    max-height: 120px !important;
+    margin: 0 auto 12px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 12px;
     background: #f1f1f1;
     font-size: 50px;
 }
+
+.staff-card {
+    overflow: hidden;
+}
+
+.staff-card h3,
+.staff-card p {
+    display: block;
+}
+
 </style>
 </head>
 
