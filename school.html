@@ -310,6 +310,27 @@ footer {
     align-items: center !important;
 }
 
+  staff-photo {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto 12px;
+    border: 1px solid #ddd;
+}
+
+.staff-photo-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    background: #f1f1f1;
+    font-size: 50px;
+}
 </style>
 </head>
 
@@ -422,7 +443,7 @@ async function loadStaff() {
 
   const { data, error } = await sb
     .from("staff")
-    .select("name, role, sort_order")
+    .select("name, role, sort_order, photo_url")
     .order("sort_order", {
       ascending: true
     });
@@ -454,9 +475,17 @@ async function loadStaff() {
     card.className = "staff-card";
 
     card.innerHTML = `
-      <h3>${escapeHtml(staff.name || "")}</h3>
-      <p>${escapeHtml(staff.role || "")}</p>
-    `;
+    ${
+      staff.photo_url
+        ? `<img src="${escapeHtml(staff.photo_url)}"
+             alt="${escapeHtml(staff.name || "Staff")}"
+             class="staff-photo">`
+        : `<div class="staff-photo-placeholder">👤</div>`
+    }
+
+    <h3>${escapeHtml(staff.name || "")}</h3>
+    <p>${escapeHtml(staff.role || "")}</p>
+`;
 
     container.appendChild(card);
 
