@@ -206,6 +206,7 @@ footer {
     display: flex !important;
     flex-direction: row !important;
     width: max-content !important;
+    min-width: max-content !important;
     animation: announcementMove 25s linear infinite !important;
     will-change: transform;
 }
@@ -216,16 +217,15 @@ footer {
     flex-wrap: nowrap !important;
     width: max-content !important;
     min-width: max-content !important;
-    flex-shrink: 0 !important;
+    flex: 0 0 auto !important;
     align-items: center;
 }
 
-
 .announcement-item {
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
-    white-space: nowrap;
-    flex-shrink: 0;
+    white-space: nowrap !important;
+    flex: 0 0 auto !important;
     padding: 0 30px;
 }
 
