@@ -318,9 +318,9 @@ footer {
     min-width: 120px !important;
     min-height: 120px !important;
     object-fit: cover !important;
-    border-radius: 12px;
     display: block !important;
-    margin: 0 auto 12px;
+    margin: 0 auto 12px !important;
+    border-radius: 12px !important;
     border: 1px solid #ddd;
 }
 
@@ -345,6 +345,49 @@ footer {
 .staff-card h3,
 .staff-card p {
     display: block;
+}
+
+  /* FINAL STAFF CARD FIX */
+.staff-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    gap: 20px !important;
+}
+
+.staff-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: center !important;
+    overflow: hidden !important;
+    min-height: 220px !important;
+}
+
+.staff-card img.staff-photo {
+    display: block !important;
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px !important;
+    min-height: 120px !important;
+    max-width: 120px !important;
+    max-height: 120px !important;
+    object-fit: cover !important;
+    flex: 0 0 120px !important;
+    margin: 0 auto 12px !important;
+    border-radius: 12px !important;
+}
+
+.staff-card h3 {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 7px !important;
+}
+
+.staff-card p {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
 }
 
 </style>
