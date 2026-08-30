@@ -284,6 +284,32 @@ footer {
     }
 
 }
+  /* Desktop announcement ticker fix */
+@media (min-width: 601px) {
+    #announcementList {
+        overflow: hidden !important;
+    }
+
+    .announcement-track {
+        display: flex !important;
+        flex-direction: row !important;
+        width: max-content !important;
+        min-width: max-content !important;
+        animation: announcementMove 15s linear infinite !important;
+        animation-play-state: running !important;
+        will-change: transform !important;
+    }
+
+    .announcement-group {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        width: max-content !important;
+        min-width: max-content !important;
+        flex-shrink: 0 !important;
+    }
+}
+
 </style>
 </head>
 
