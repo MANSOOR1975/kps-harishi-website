@@ -116,6 +116,30 @@ section {
   padding: 20px;
   color: #666;
 }
+  #announcementList {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+#announcementList .message {
+    display: inline-block;
+    min-width: 100%;
+    animation: announcementMove 18s linear infinite;
+}
+
+#announcementList .message:hover {
+    animation-play-state: paused;
+}
+
+@keyframes announcementMove {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
 
 footer {
   margin-top: 50px;
