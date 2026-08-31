@@ -77,6 +77,14 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <button onclick="show('settings',this);loadSettings()">⚙️ School Information</button>
 <button onclick="show('staff',this);loadStaff()">👨‍🏫 Staff</button>
 <button onclick="show('announcements',this);loadAnnouncements()">📢 Announcements</button>
+<button onclick="show('achievements',this);loadAchievements()">🏆 Achievements</button>
+
+<button onclick="show('results',this);loadResults()">📊 Results</button>
+
+<button onclick="show('studentCorner',this);loadStudentCorner()">👨‍🎓 Student Corner</button>
+
+<button onclick="show('departmentLinks',this);loadDepartmentLinks()">🔗 Department Useful Links</button>
+
 </aside>
 
 <main class="main">
@@ -143,6 +151,169 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 
 </div>
 </section> 
+
+ <section id="achievements" class="hidden">
+
+<div class="panel">
+
+<h2>🏆 Achievements</h2>
+
+<p class="muted">
+Add and manage school achievements.
+</p>
+
+<label>Achievement Title</label>
+<input id="achievementTitle"
+       placeholder="Example: State Level Science Exhibition">
+
+<label>Description</label>
+<textarea id="achievementDescription"
+          rows="4"
+          placeholder="Enter achievement details"></textarea>
+
+<label>Date</label>
+<input id="achievementDate" type="date">
+
+<button class="btn" onclick="addAchievement()">
+➕ Add Achievement
+</button>
+
+<div id="achievementMsg" class="msg"></div>
+
+<hr>
+
+<h3>Published Achievements</h3>
+
+<div id="achievementList"></div>
+
+</div>
+
+</section>
+
+ <section id="results" class="hidden">
+
+<div class="panel">
+
+<h2>📊 Results</h2>
+
+<p class="muted">
+Add and manage school examination results.
+</p>
+
+<label>Examination Name</label>
+<input id="resultExamName"
+       placeholder="Example: SSLC Examination">
+
+<label>Academic Year</label>
+<input id="resultAcademicYear"
+       placeholder="Example: 2025-26">
+
+<label>Result</label>
+<input id="resultValue"
+       placeholder="Example: 96.5%">
+
+<label>Description</label>
+<textarea id="resultDescription"
+          rows="4"
+          placeholder="Enter result details"></textarea>
+
+<button class="btn" onclick="addResult()">
+➕ Add Result
+</button>
+
+<div id="resultMsg" class="msg"></div>
+
+<hr>
+
+<h3>Published Results</h3>
+
+<div id="resultList"></div>
+
+</div>
+
+</section>
+
+ <section id="studentCorner" class="hidden">
+
+<div class="panel">
+
+<h2>👨‍🎓 Student Corner</h2>
+
+<p class="muted">
+Add useful information and resources for students.
+</p>
+
+<label>Title</label>
+<input id="studentTitle"
+       placeholder="Example: Scholarship Information">
+
+<label>Description</label>
+<textarea id="studentDescription"
+          rows="4"
+          placeholder="Enter information for students"></textarea>
+
+<label>Link URL (optional)</label>
+<input id="studentLink"
+       placeholder="https://example.com">
+
+<button class="btn" onclick="addStudentCorner()">
+➕ Add Student Resource
+</button>
+
+<div id="studentMsg" class="msg"></div>
+
+<hr>
+
+<h3>Student Resources</h3>
+
+<div id="studentList"></div>
+
+</div>
+
+</section>
+
+ <section id="departmentLinks" class="hidden">
+
+<div class="panel">
+
+<h2>🔗 Department Useful Links</h2>
+
+<p class="muted">
+Add useful links for different government departments.
+</p>
+
+<label>Department</label>
+<input id="departmentName"
+       placeholder="Example: Department of Education">
+
+<label>Link Title</label>
+<input id="departmentTitle"
+       placeholder="Example: Karnataka Education Department">
+
+<label>URL</label>
+<input id="departmentUrl"
+       placeholder="https://...">
+
+<label>Description</label>
+<textarea id="departmentDescription"
+          rows="3"
+          placeholder="Enter link description"></textarea>
+
+<button class="btn" onclick="addDepartmentLink()">
+➕ Add Useful Link
+</button>
+
+<div id="departmentMsg" class="msg"></div>
+
+<hr>
+
+<h3>Department Links</h3>
+
+<div id="departmentList"></div>
+
+</div>
+
+</section>
 </main></div></div>
 
 <script>
@@ -1308,6 +1479,870 @@ function escapeHtml(text) {
 
   return div.innerHTML;
 }
+ window.loadAchievements = async function() {
+
+  const list = document.getElementById("achievementList");
+
+  list.innerHTML = "";
+
+  const { data, error } = await sb
+    .from("achievements")
+    .select("*")
+    .order("achievement_date", { ascending: false });
+
+  if (error) {
+    msg("achievementMsg", error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML =
+      '<p class="muted">No achievements available.</p>';
+    return;
+  }
+
+  data.forEach(row => {
+
+    const div = document.createElement("div");
+
+    div.className = "card";
+
+    const date = row.achievement_date
+      ? new Date(row.achievement_date)
+          .toLocaleDateString("en-IN")
+      : "";
+
+    div.innerHTML = `
+      <h3>🏆 ${escapeHtml(row.title)}</h3>
+
+      <p class="muted">${date}</p>
+
+      <p>${escapeHtml(row.description || "")}</p>
+
+      <button class="btn"
+        onclick="editAchievement(
+          ${row.id},
+          '${encodeURIComponent(row.title)}',
+          '${encodeURIComponent(row.description || "")}'
+        )">
+        ✏️ Edit
+      </button>
+
+      <button class="btn danger"
+        onclick="deleteAchievement(
+          ${row.id},
+          '${encodeURIComponent(row.title)}'
+        )">
+        🗑️ Delete
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+};
+
+
+window.addAchievement = async function() {
+
+  const title =
+    document.getElementById("achievementTitle")
+      .value.trim();
+
+  const description =
+    document.getElementById("achievementDescription")
+      .value.trim();
+
+  const date =
+    document.getElementById("achievementDate")
+      .value;
+
+  if (!title) {
+    msg(
+      "achievementMsg",
+      "Please enter the achievement title."
+    );
+    return;
+  }
+
+  const { error } = await sb
+    .from("achievements")
+    .insert({
+      title: title,
+      description: description,
+      achievement_date: date || null
+    });
+
+  if (error) {
+    msg("achievementMsg", error.message);
+    return;
+  }
+
+  msg(
+    "achievementMsg",
+    "Achievement added successfully.",
+    true
+  );
+
+  document.getElementById("achievementTitle").value = "";
+  document.getElementById("achievementDescription").value = "";
+  document.getElementById("achievementDate").value = "";
+
+  loadAchievements();
+};
+
+
+window.editAchievement = async function(
+  id,
+  encodedTitle,
+  encodedDescription
+) {
+
+  const oldTitle =
+    decodeURIComponent(encodedTitle);
+
+  const oldDescription =
+    decodeURIComponent(encodedDescription);
+
+  const title = prompt(
+    "Enter achievement title:",
+    oldTitle
+  );
+
+  if (!title || !title.trim()) return;
+
+  const description = prompt(
+    "Enter achievement description:",
+    oldDescription
+  );
+
+  if (description === null) return;
+
+  const { error } = await sb
+    .from("achievements")
+    .update({
+      title: title.trim(),
+      description: description.trim()
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg("achievementMsg", error.message);
+    return;
+  }
+
+  msg(
+    "achievementMsg",
+    "Achievement updated successfully.",
+    true
+  );
+
+  loadAchievements();
+};
+
+
+window.deleteAchievement = async function(
+  id,
+  encodedTitle
+) {
+
+  const title =
+    decodeURIComponent(encodedTitle);
+
+  if (!confirm(
+    `Delete "${title}" from achievements?`
+  )) {
+    return;
+  }
+
+  const { error } = await sb
+    .from("achievements")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    msg("achievementMsg", error.message);
+    return;
+  }
+
+  msg(
+    "achievementMsg",
+    "Achievement deleted successfully.",
+    true
+  );
+
+  loadAchievements();
+};
+window.loadResults = async function() {
+
+  const list =
+    document.getElementById("resultList");
+
+  list.innerHTML = "";
+
+  const { data, error } = await sb
+    .from("results")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    msg("resultMsg", error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML =
+      '<p class="muted">No results available.</p>';
+    return;
+  }
+
+  data.forEach(row => {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "card";
+
+    div.innerHTML = `
+      <h3>📊 ${escapeHtml(row.exam_name)}</h3>
+
+      <p class="muted">
+        Academic Year:
+        ${escapeHtml(row.academic_year || "")}
+      </p>
+
+      <p>
+        <strong>
+          Result:
+          ${escapeHtml(row.result_value || "")}
+        </strong>
+      </p>
+
+      <p>
+        ${escapeHtml(row.description || "")}
+      </p>
+
+      <button class="btn"
+        onclick="editResult(
+          ${row.id},
+          '${encodeURIComponent(row.exam_name)}',
+          '${encodeURIComponent(row.academic_year || "")}',
+          '${encodeURIComponent(row.result_value || "")}',
+          '${encodeURIComponent(row.description || "")}'
+        )">
+        ✏️ Edit
+      </button>
+
+      <button class="btn danger"
+        onclick="deleteResult(
+          ${row.id},
+          '${encodeURIComponent(row.exam_name)}'
+        )">
+        🗑️ Delete
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+};
+
+
+window.addResult = async function() {
+
+  const examName =
+    document.getElementById("resultExamName")
+      .value.trim();
+
+  const academicYear =
+    document.getElementById("resultAcademicYear")
+      .value.trim();
+
+  const resultValue =
+    document.getElementById("resultValue")
+      .value.trim();
+
+  const description =
+    document.getElementById("resultDescription")
+      .value.trim();
+
+  if (!examName) {
+    msg(
+      "resultMsg",
+      "Please enter the examination name."
+    );
+    return;
+  }
+
+  const { error } = await sb
+    .from("results")
+    .insert({
+      exam_name: examName,
+      academic_year: academicYear,
+      result_value: resultValue,
+      description: description
+    });
+
+  if (error) {
+    msg("resultMsg", error.message);
+    return;
+  }
+
+  msg(
+    "resultMsg",
+    "Result added successfully.",
+    true
+  );
+
+  document.getElementById("resultExamName").value = "";
+  document.getElementById("resultAcademicYear").value = "";
+  document.getElementById("resultValue").value = "";
+  document.getElementById("resultDescription").value = "";
+
+  loadResults();
+};
+
+
+window.editResult = async function(
+  id,
+  exam,
+  year,
+  result,
+  description
+) {
+
+  const examName =
+    prompt(
+      "Examination name:",
+      decodeURIComponent(exam)
+    );
+
+  if (!examName || !examName.trim()) return;
+
+  const academicYear =
+    prompt(
+      "Academic year:",
+      decodeURIComponent(year)
+    );
+
+  if (academicYear === null) return;
+
+  const resultValue =
+    prompt(
+      "Result:",
+      decodeURIComponent(result)
+    );
+
+  if (resultValue === null) return;
+
+  const desc =
+    prompt(
+      "Description:",
+      decodeURIComponent(description)
+    );
+
+  if (desc === null) return;
+
+  const { error } = await sb
+    .from("results")
+    .update({
+      exam_name: examName.trim(),
+      academic_year: academicYear.trim(),
+      result_value: resultValue.trim(),
+      description: desc.trim()
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg("resultMsg", error.message);
+    return;
+  }
+
+  msg(
+    "resultMsg",
+    "Result updated successfully.",
+    true
+  );
+
+  loadResults();
+};
+
+
+window.deleteResult = async function(
+  id,
+  encodedName
+) {
+
+  const name =
+    decodeURIComponent(encodedName);
+
+  if (!confirm(
+    `Delete "${name}" from results?`
+  )) {
+    return;
+  }
+
+  const { error } = await sb
+    .from("results")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    msg("resultMsg", error.message);
+    return;
+  }
+
+  msg(
+    "resultMsg",
+    "Result deleted successfully.",
+    true
+  );
+
+  loadResults();
+};
+window.loadStudentCorner = async function() {
+
+  const list =
+    document.getElementById("studentList");
+
+  list.innerHTML = "";
+
+  const { data, error } = await sb
+    .from("student_corner")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    msg("studentMsg", error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML =
+      '<p class="muted">No student resources available.</p>';
+    return;
+  }
+
+  data.forEach(row => {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "card";
+
+    const link = row.link_url
+      ? `
+        <p>
+          <a href="${escapeHtml(row.link_url)}"
+             target="_blank"
+             rel="noopener">
+             🔗 Open Resource
+          </a>
+        </p>
+      `
+      : "";
+
+    div.innerHTML = `
+      <h3>👨‍🎓 ${escapeHtml(row.title)}</h3>
+
+      <p>
+        ${escapeHtml(row.description || "")}
+      </p>
+
+      ${link}
+
+      <button class="btn"
+        onclick="editStudentCorner(
+          ${row.id},
+          '${encodeURIComponent(row.title)}',
+          '${encodeURIComponent(row.description || "")}',
+          '${encodeURIComponent(row.link_url || "")}'
+        )">
+        ✏️ Edit
+      </button>
+
+      <button class="btn danger"
+        onclick="deleteStudentCorner(
+          ${row.id},
+          '${encodeURIComponent(row.title)}'
+        )">
+        🗑️ Delete
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+};
+
+
+window.addStudentCorner = async function() {
+
+  const title =
+    document.getElementById("studentTitle")
+      .value.trim();
+
+  const description =
+    document.getElementById("studentDescription")
+      .value.trim();
+
+  const link =
+    document.getElementById("studentLink")
+      .value.trim();
+
+  if (!title) {
+    msg(
+      "studentMsg",
+      "Please enter a title."
+    );
+    return;
+  }
+
+  const { error } = await sb
+    .from("student_corner")
+    .insert({
+      title: title,
+      description: description,
+      link_url: link || null
+    });
+
+  if (error) {
+    msg("studentMsg", error.message);
+    return;
+  }
+
+  msg(
+    "studentMsg",
+    "Student resource added successfully.",
+    true
+  );
+
+  document.getElementById("studentTitle").value = "";
+  document.getElementById("studentDescription").value = "";
+  document.getElementById("studentLink").value = "";
+
+  loadStudentCorner();
+};
+
+
+window.editStudentCorner = async function(
+  id,
+  title,
+  description,
+  link
+) {
+
+  const newTitle =
+    prompt(
+      "Title:",
+      decodeURIComponent(title)
+    );
+
+  if (!newTitle || !newTitle.trim()) return;
+
+  const newDescription =
+    prompt(
+      "Description:",
+      decodeURIComponent(description)
+    );
+
+  if (newDescription === null) return;
+
+  const newLink =
+    prompt(
+      "Link URL:",
+      decodeURIComponent(link)
+    );
+
+  if (newLink === null) return;
+
+  const { error } = await sb
+    .from("student_corner")
+    .update({
+      title: newTitle.trim(),
+      description: newDescription.trim(),
+      link_url: newLink.trim() || null
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg("studentMsg", error.message);
+    return;
+  }
+
+  msg(
+    "studentMsg",
+    "Student resource updated successfully.",
+    true
+  );
+
+  loadStudentCorner();
+};
+
+
+window.deleteStudentCorner = async function(
+  id,
+  encodedTitle
+) {
+
+  const title =
+    decodeURIComponent(encodedTitle);
+
+  if (!confirm(
+    `Delete "${title}" from Student Corner?`
+  )) {
+    return;
+  }
+
+  const { error } = await sb
+    .from("student_corner")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    msg("studentMsg", error.message);
+    return;
+  }
+
+  msg(
+    "studentMsg",
+    "Student resource deleted successfully.",
+    true
+  );
+
+  loadStudentCorner();
+};
+window.loadDepartmentLinks = async function() {
+
+  const list =
+    document.getElementById("departmentList");
+
+  list.innerHTML = "";
+
+  const { data, error } = await sb
+    .from("department_links")
+    .select("*")
+    .order("department", { ascending: true });
+
+  if (error) {
+    msg("departmentMsg", error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML =
+      '<p class="muted">No department links available.</p>';
+    return;
+  }
+
+  data.forEach(row => {
+
+    const div =
+      document.createElement("div");
+
+    div.className = "card";
+
+    div.innerHTML = `
+      <h3>🔗 ${escapeHtml(row.title)}</h3>
+
+      <p>
+        <strong>
+          ${escapeHtml(row.department)}
+        </strong>
+      </p>
+
+      <p>
+        ${escapeHtml(row.description || "")}
+      </p>
+
+      <p>
+        <a href="${escapeHtml(row.url)}"
+           target="_blank"
+           rel="noopener">
+           🌐 Open Link
+        </a>
+      </p>
+
+      <button class="btn"
+        onclick="editDepartmentLink(
+          ${row.id},
+          '${encodeURIComponent(row.department)}',
+          '${encodeURIComponent(row.title)}',
+          '${encodeURIComponent(row.url)}',
+          '${encodeURIComponent(row.description || "")}'
+        )">
+        ✏️ Edit
+      </button>
+
+      <button class="btn danger"
+        onclick="deleteDepartmentLink(
+          ${row.id},
+          '${encodeURIComponent(row.title)}'
+        )">
+        🗑️ Delete
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+};
+
+
+window.addDepartmentLink = async function() {
+
+  const department =
+    document.getElementById("departmentName")
+      .value.trim();
+
+  const title =
+    document.getElementById("departmentTitle")
+      .value.trim();
+
+  const url =
+    document.getElementById("departmentUrl")
+      .value.trim();
+
+  const description =
+    document.getElementById("departmentDescription")
+      .value.trim();
+
+  if (!department || !title || !url) {
+
+    msg(
+      "departmentMsg",
+      "Please enter department, title and URL."
+    );
+
+    return;
+  }
+
+  const { error } = await sb
+    .from("department_links")
+    .insert({
+      department: department,
+      title: title,
+      url: url,
+      description: description
+    });
+
+  if (error) {
+    msg("departmentMsg", error.message);
+    return;
+  }
+
+  msg(
+    "departmentMsg",
+    "Department link added successfully.",
+    true
+  );
+
+  document.getElementById("departmentName").value = "";
+  document.getElementById("departmentTitle").value = "";
+  document.getElementById("departmentUrl").value = "";
+  document.getElementById("departmentDescription").value = "";
+
+  loadDepartmentLinks();
+};
+
+
+window.editDepartmentLink = async function(
+  id,
+  department,
+  title,
+  url,
+  description
+) {
+
+  const newDepartment =
+    prompt(
+      "Department:",
+      decodeURIComponent(department)
+    );
+
+  if (!newDepartment || !newDepartment.trim())
+    return;
+
+  const newTitle =
+    prompt(
+      "Link title:",
+      decodeURIComponent(title)
+    );
+
+  if (!newTitle || !newTitle.trim())
+    return;
+
+  const newUrl =
+    prompt(
+      "URL:",
+      decodeURIComponent(url)
+    );
+
+  if (!newUrl || !newUrl.trim())
+    return;
+
+  const newDescription =
+    prompt(
+      "Description:",
+      decodeURIComponent(description)
+    );
+
+  if (newDescription === null) return;
+
+  const { error } = await sb
+    .from("department_links")
+    .update({
+      department: newDepartment.trim(),
+      title: newTitle.trim(),
+      url: newUrl.trim(),
+      description: newDescription.trim()
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg("departmentMsg", error.message);
+    return;
+  }
+
+  msg(
+    "departmentMsg",
+    "Department link updated successfully.",
+    true
+  );
+
+  loadDepartmentLinks();
+};
+
+
+window.deleteDepartmentLink = async function(
+  id,
+  encodedTitle
+) {
+
+  const title =
+    decodeURIComponent(encodedTitle);
+
+  if (!confirm(
+    `Delete "${title}" from Department Useful Links?`
+  )) {
+    return;
+  }
+
+  const { error } = await sb
+    .from("department_links")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    msg("departmentMsg", error.message);
+    return;
+  }
+
+  msg(
+    "departmentMsg",
+    "Department link deleted successfully.",
+    true
+  );
+
+  loadDepartmentLinks();
+};
+
 </script>
 </body>
 </html>
