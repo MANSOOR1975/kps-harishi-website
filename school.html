@@ -116,30 +116,26 @@ section {
   padding: 20px;
   color: #666;
 }
-  #announcementList {
+ /* Scrolling announcements */
+#announcementList {
     overflow: hidden;
+    width: 100%;
     white-space: nowrap;
 }
 
-#announcementList .message {
+#announcementList > * {
     display: inline-block;
-    min-width: 100%;
-    animation: announcementMove 18s linear infinite;
+    animation: announcementScroll 15s linear infinite;
 }
 
-#announcementList .message:hover {
-    animation-play-state: paused;
-}
-
-@keyframes announcementMove {
-    from {
+@keyframes announcementScroll {
+    0% {
         transform: translateX(100%);
     }
-    to {
+    100% {
         transform: translateX(-100%);
     }
 }
-
 
 footer {
   margin-top: 50px;
