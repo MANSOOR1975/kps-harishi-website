@@ -388,6 +388,72 @@ footer {
     margin: 0 !important;
 }
 
+  /* =====================================
+   SCHOOL INFORMATION SECTIONS
+   ===================================== */
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.info-card {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  border-left: 5px solid #123b68;
+}
+
+.info-card h3 {
+  margin: 0 0 10px;
+  color: #123b68;
+  font-size: 20px;
+}
+
+.info-card p {
+  margin: 8px 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+.info-date {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.info-result {
+  font-size: 22px;
+  font-weight: bold;
+  color: #123b68;
+  margin: 10px 0;
+}
+
+.info-link {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 9px 14px;
+  background: #123b68;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.info-link:hover {
+  opacity: .9;
+}
+
+.department-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
 </style>
 </head>
 
@@ -401,6 +467,11 @@ footer {
 
 <nav>
   <a href="#home">Home</a>
+  <a href="#announcements">Announcements</a>
+  <a href="#achievements">Achievements</a>
+  <a href="#results">Results</a>
+  <a href="#student-corner">Student Corner</a>
+  <a href="#department-links">Useful Links</a>
   <a href="#staff">Staff</a>
   <a href="#gallery">Gallery</a>
 </nav>
@@ -431,6 +502,35 @@ footer {
     <div id="announcementList">
         <div class="message">Loading announcements...</div>
     </div>
+
+  <section id="achievements">
+  <h2 class="section-title">🏆 Achievements</h2>
+  <div id="achievementList" class="info-grid">
+    <div class="message">Loading achievements...</div>
+  </div>
+</section>
+
+<section id="results">
+  <h2 class="section-title">📊 Results</h2>
+  <div id="resultList" class="info-grid">
+    <div class="message">Loading results...</div>
+  </div>
+</section>
+
+<section id="student-corner">
+  <h2 class="section-title">🎓 Student Corner</h2>
+  <div id="studentResourceList" class="info-grid">
+    <div class="message">Loading student resources...</div>
+  </div>
+</section>
+
+<section id="department-links">
+  <h2 class="section-title">🔗 Department Useful Links</h2>
+  <div id="departmentLinkList" class="info-grid">
+    <div class="message">Loading useful links...</div>
+  </div>
+</section>
+
 
 </section>
 
@@ -719,6 +819,315 @@ container.appendChild(card);
   });
 }
 
+  /* =========================
+   LOAD ACHIEVEMENTS
+   ========================= */
+
+async function loadAchievements() {
+  const container = document.getElementById("achievementList");
+
+  const { data, error } = await sb
+    .from("achievements")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Achievements:", error);
+    container.innerHTML =
+      '<div class="message">Unable to load achievements.</div>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML =
+      '<div class="message">No achievements available.</div>';
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(row => {
+    const title =
+      row.title ||
+      row.achievement_title ||
+      "Achievement";
+
+    const description =
+      row.description ||
+      row.content ||
+      "";
+
+    const date =
+      row.achievement_date ||
+      row.date ||
+      row.created_at ||
+      "";
+
+    const card = document.createElement("div");
+    card.className = "info-card";
+
+    card.innerHTML = `
+      <h3>🏆 ${escapeHtml(title)}</h3>
+
+      ${
+        date
+          ? `<div class="info-date">
+               ${new Date(date).toLocaleDateString("en-IN")}
+             </div>`
+          : ""
+      }
+
+      <p>${escapeHtml(description)}</p>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+
+/* =========================
+   LOAD RESULTS
+   ========================= */
+
+async function loadResults() {
+  const container = document.getElementById("resultList");
+
+  const { data, error } = await sb
+    .from("results")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Results:", error);
+    container.innerHTML =
+      '<div class="message">Unable to load results.</div>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML =
+      '<div class="message">No results available.</div>';
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(row => {
+
+    const examName =
+      row.exam_name ||
+      row.examination_name ||
+      row.title ||
+      "Examination Result";
+
+    const academicYear =
+      row.academic_year ||
+      row.year ||
+      "";
+
+    const result =
+      row.result ||
+      row.percentage ||
+      "";
+
+    const description =
+      row.description ||
+      row.content ||
+      "";
+
+    const card = document.createElement("div");
+    card.className = "info-card";
+
+    card.innerHTML = `
+      <h3>📊 ${escapeHtml(examName)}</h3>
+
+      ${
+        academicYear
+          ? `<div class="info-date">
+               Academic Year: ${escapeHtml(academicYear)}
+             </div>`
+          : ""
+      }
+
+      ${
+        result
+          ? `<div class="info-result">
+               ${escapeHtml(result)}
+             </div>`
+          : ""
+      }
+
+      ${
+        description
+          ? `<p>${escapeHtml(description)}</p>`
+          : ""
+      }
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+
+/* =========================
+   LOAD STUDENT CORNER
+   ========================= */
+
+async function loadStudentCorner() {
+  const container =
+    document.getElementById("studentResourceList");
+
+  const { data, error } = await sb
+    .from("student_resources")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Student Corner:", error);
+    container.innerHTML =
+      '<div class="message">Unable to load student resources.</div>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML =
+      '<div class="message">No student resources available.</div>';
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(row => {
+
+    const title =
+      row.title ||
+      row.resource_title ||
+      "Student Resource";
+
+    const description =
+      row.description ||
+      row.content ||
+      "";
+
+    const url =
+      row.link_url ||
+      row.url ||
+      row.link ||
+      "";
+
+    const card = document.createElement("div");
+    card.className = "info-card";
+
+    card.innerHTML = `
+      <h3>🎓 ${escapeHtml(title)}</h3>
+
+      <p>${escapeHtml(description)}</p>
+
+      ${
+        url
+          ? `<a
+               class="info-link"
+               href="${escapeHtml(url)}"
+               target="_blank"
+               rel="noopener noreferrer">
+               Open Resource ↗
+             </a>`
+          : ""
+      }
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+
+/* =========================
+   LOAD DEPARTMENT LINKS
+   ========================= */
+
+async function loadDepartmentLinks() {
+  const container =
+    document.getElementById("departmentLinkList");
+
+  const { data, error } = await sb
+    .from("department_links")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Department Links:", error);
+    container.innerHTML =
+      '<div class="message">Unable to load useful links.</div>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    container.innerHTML =
+      '<div class="message">No department links available.</div>';
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(row => {
+
+    const department =
+      row.department ||
+      row.department_name ||
+      "";
+
+    const title =
+      row.link_title ||
+      row.title ||
+      "Useful Link";
+
+    const url =
+      row.url ||
+      row.link_url ||
+      row.link ||
+      "";
+
+    const description =
+      row.description ||
+      "";
+
+    const card = document.createElement("div");
+    card.className = "info-card";
+
+    card.innerHTML = `
+
+      ${
+        department
+          ? `<div class="department-name">
+               ${escapeHtml(department)}
+             </div>`
+          : ""
+      }
+
+      <h3>🔗 ${escapeHtml(title)}</h3>
+
+      ${
+        description
+          ? `<p>${escapeHtml(description)}</p>`
+          : ""
+      }
+
+      ${
+        url
+          ? `<a
+               class="info-link"
+               href="${escapeHtml(url)}"
+               target="_blank"
+               rel="noopener noreferrer">
+               Visit Website ↗
+             </a>`
+          : ""
+      }
+    `;
+
+    container.appendChild(card);
+  });
+}
 
 /* =========================
    SECURITY
@@ -743,6 +1152,10 @@ function escapeHtml(value) {
 loadStaff();
 loadGallery();
 loadAnnouncements();
+loadAchievements();
+loadResults();
+loadStudentCorner();
+loadDepartmentLinks();
 
 // Gallery Lightbox
 const lightbox = document.getElementById("lightbox");
