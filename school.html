@@ -117,28 +117,52 @@ section {
   color: #666;
 }
  /* Scrolling announcements */
+  
+/* Announcement Ticker */
 #announcementList {
     overflow: hidden;
     width: 100%;
-    white-space: nowrap;
 }
 
-#announcementList > * {
-    display: inline-block;
-    animation: announcementScroll 15s linear infinite;
+.announcement-ticker {
+    width: 100%;
+    overflow: hidden;
+}
+
+.announcement-track {
+    display: flex;
+    width: max-content;
+    animation: announcementScroll 30s linear infinite;
+}
+
+.announcement-group {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-shrink: 0;
+    padding-right: 40px;
+}
+
+.announcement-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 @keyframes announcementScroll {
     from {
-        transform: translateX(100%);
+        transform: translateX(0);
     }
     to {
-        transform: translateX(-100%);
+        transform: translateX(-50%);
     }
 }
 
+/* Mobile slower */
 @media (max-width: 600px) {
-    #announcementList > .announcement-ticker {
+    .announcement-track {
         animation-duration: 90s;
     }
 }
