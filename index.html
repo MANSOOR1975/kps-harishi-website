@@ -2420,6 +2420,241 @@ window.deleteDepartmentLink = async function(
   loadDepartmentLinks();
 };
 
+ /* =========================
+   STUDENT STRENGTH
+   ========================= */
+
+function buildStrengthTable() {
+  const body = document.getElementById("strengthBody");
+  const foot = document.getElementById("strengthFoot");
+
+  if (!body) return;
+
+  body.innerHTML = "";
+
+  for (let cls = 1; cls <= 12; cls++) {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td><b>${cls}</b></td>
+
+      <td>
+        <input type="number" min="0" id="kb_${cls}"
+          style="width:80px" oninput="calculateStrengthTotals()">
+      </td>
+
+      <td>
+        <input type="number" min="0" id="kg_${cls}"
+          style="width:80px" oninput="calculateStrengthTotals()">
+      </td>
+
+      <td id="kt_${cls}">0</td>
+
+      <td>
+        <input type="number" min="0" id="eb_${cls}"
+          style="width:80px" oninput="calculateStrengthTotals()">
+      </td>
+
+      <td>
+        <input type="number" min="0" id="eg_${cls}"
+          style="width:80px" oninput="calculateStrengthTotals()">
+      </td>
+
+      <td id="et_${cls}">0</td>
+
+      <td id="gb_${cls}">0</td>
+
+      <td id="gg_${cls}">0</td>
+
+      <td id="gt_${cls}">0</td>
+    `;
+
+    body.appendChild(row);
+  }
+
+  calculateStrengthTotals();
+}
+
+
+/* Calculate row and grand totals */
+function calculateStrengthTotals() {
+  let kbTotal = 0;
+  let kgTotal = 0;
+  let ebTotal = 0;
+  let egTotal = 0;
+
+  for (let cls = 1; cls <= 12; cls++) {
+
+    const kb = Number(document.getElementById(`kb_${cls}`)?.value || 0);
+    const kg = Number(document.getElementById(`kg_${cls}`)?.value || 0);
+    const eb = Number(document.getElementById(`eb_${cls}`)?.value || 0);
+    const eg = Number(document.getElementById(`eg_${cls}`)?.value || 0);
+
+    const kt = kb + kg;
+    const et = eb + eg;
+
+    const gb = kb + eb;
+    const gg = kg + eg;
+    const gt = gb + gg;
+
+    document.getElementById(`kt_${cls}`).textContent = kt;
+    document.getElementById(`et_${cls}`).textContent = et;
+    document.getElementById(`gb_${cls}`).textContent = gb;
+    document.getElementById(`gg_${cls}`).textContent = gg;
+    document.getElementById(`gt_${cls}`).textContent = gt;
+
+    kbTotal += kb;
+    kgTotal += kg;
+    ebTotal += eb;
+    egTotal += eg;
+  }
+
+  const grandKB = kbTotal + kgTotal;
+  const grandET = ebTotal + egTotal;
+
+  const grandBoys = kbTotal + ebTotal;
+  const grandGirls = kgTotal + egTotal;
+  const grandTotal = grandBoys + grandGirls;
+
+  const foot = document.getElementById("strengthFoot");
+
+  if (foot) {
+    foot.innerHTML = `
+      <tr>
+        <th>TOTAL</th>
+        <th>${kbTotal}</th>
+        <th>${kgTotal}</th>
+        <th>${grandKB}</th>
+        <th>${ebTotal}</th>
+        <th>${egTotal}</th>
+        <th>${grandET}</th>
+        <th>${grandBoys}</th>
+        <th>${grandGirls}</th>
+        <th>${grandTotal}</th>
+      </tr>
+    `;
+  }
+}
+
+
+/* Save Student Strength */
+window.saveStudentStrength = async function () {
+
+  const academicYear =
+    document.getElementById("strengthAcademicYear")?.value.trim();
+
+  if (!academicYear) {
+    msg(
+      "strengthMsg",
+      "Please enter the Academic Year.",
+      false
+    );
+    return;
+  }
+
+  const records = [];
+
+  for (let cls = 1; cls <= 12; cls++) {
+
+    const kb = Number(
+      document.getElementById(`kb_${cls}`)?.value || 0
+    );
+
+    const kg = Number(
+      document.getElementById(`kg_${cls}`)?.value || 0
+    );
+
+    const eb = Number(
+      document.getElementById(`eb_${cls}`)?.value || 0
+    );
+
+    const eg = Number(
+      document.getElementById(`eg_${cls}`)?.value || 0
+    );
+
+    records.push({
+      academic_year: academicYear,
+      class_number: cls,
+      kannada_boys: kb,
+      kannada_girls: kg,
+      english_boys: eb,
+      english_girls: eg
+    });
+  }
+
+  const { error } = await sb
+    .from("student_strength")
+    .delete()
+    .eq("academic_year", academicYear);
+
+  if (error) {
+    msg("strengthMsg", error.message, false);
+    return;
+  }
+
+  const { error: insertError } = await sb
+    .from("student_strength")
+    .insert(records);
+
+  if (insertError) {
+    msg("strengthMsg", insertError.message, false);
+    return;
+  }
+
+  msg(
+    "strengthMsg",
+    "Student strength saved successfully.",
+    true
+  );
+
+  await loadStudentStrength();
+};
+
+
+/* Load Student Strength */
+window.loadStudentStrength = async function () {
+
+  buildStrengthTable();
+
+  const academicYear =
+    document.getElementById("strengthAcademicYear")?.value.trim();
+
+  if (!academicYear) return;
+
+  const { data, error } = await sb
+    .from("student_strength")
+    .select("*")
+    .eq("academic_year", academicYear)
+    .order("class_number", { ascending: true });
+
+  if (error) {
+    msg("strengthMsg", error.message, false);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    calculateStrengthTotals();
+    return;
+  }
+
+  data.forEach(item => {
+
+    const cls = item.class_number;
+
+    const kb = document.getElementById(`kb_${cls}`);
+    const kg = document.getElementById(`kg_${cls}`);
+    const eb = document.getElementById(`eb_${cls}`);
+    const eg = document.getElementById(`eg_${cls}`);
+
+    if (kb) kb.value = item.kannada_boys ?? 0;
+    if (kg) kg.value = item.kannada_girls ?? 0;
+    if (eb) eb.value = item.english_boys ?? 0;
+    if (eg) eg.value = item.english_girls ?? 0;
+  });
+
+  calculateStrengthTotals();
+};
+
 </script>
 </body>
 </html>
