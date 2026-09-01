@@ -2036,7 +2036,58 @@ window.loadResults = async function () {
    LOAD SCHOOL RESULTS
    ========================================================= */
 
-async function loadSchoolResults() {
+async function saveSchoolResults() {
+  const academicYear = document.getElementById("resultAcademicYear").value.trim();
+  const examName = document.getElementById("resultExamName").value.trim();
+  const msgEl = document.getElementById("resultMsg");
+
+  if (!academicYear || !examName) {
+    msg("resultMsg", "Please enter Examination and Academic Year.");
+    return;
+  }
+
+  const rows = [];
+
+  for (let classNumber = 1; classNumber <= 12; classNumber++) {
+    const kannadaEl = document.getElementById(`result_${classNumber}_kannada`);
+    const englishEl = document.getElementById(`result_${classNumber}_english`);
+
+    const kannadaValue = kannadaEl?.value.trim();
+    const englishValue = englishEl?.value.trim();
+
+    if (kannadaValue !== "" || englishValue !== "") {
+      rows.push({
+        academic_year: academicYear,
+        exam_name: examName,
+        class_number: classNumber,
+        kannada_result: kannadaValue === "" ? 0 : Number(kannadaValue),
+        english_result: englishValue === "" ? 0 : Number(englishValue)
+      });
+    }
+  }
+
+  if (rows.length === 0) {
+    msg("resultMsg", "Please enter at least one class result.");
+    return;
+  }
+
+  const { error } = await sb
+    .from("school_results")
+    .upsert(rows, {
+      onConflict: "academic_year,exam_name,class_number"
+    });
+
+  if (error) {
+    msg("resultMsg", error.message);
+    return;
+  }
+
+  msg("resultMsg", "School results saved successfully.", true);
+
+  loadSchoolResults();
+}
+
+ async function loadSchoolResults() {
 
   const table = document.getElementById("schoolResultsTable");
   if (!table) return;
