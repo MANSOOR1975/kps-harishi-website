@@ -267,48 +267,272 @@ Add and manage school achievements.
 
 </section>
 
- <section id="results" class="hidden">
+<section id="results" class="hidden">
 
-<div class="panel">
+  <div class="panel">
 
-<h2>📊 Results</h2>
+    <h2>📊 Results</h2>
 
-<p class="muted">
-Add and manage school examination results.
-</p>
+    <p class="muted">
+      Enter school examination results and class-wise toppers.
+    </p>
 
-<label>Examination Name</label>
-<input id="resultExamName"
-       placeholder="Example: SSLC Examination">
+    <label>Examination</label>
+    <input
+      id="resultExamName"
+      placeholder="Example: SSLC Examination"
+    >
 
-<label>Academic Year</label>
-<input id="resultAcademicYear"
-       placeholder="Example: 2025-26">
+    <label>Academic Year</label>
+    <input
+      id="resultAcademicYear"
+      placeholder="Example: 2025-26"
+    >
 
-<label>Result</label>
-<input id="resultValue"
-       placeholder="Example: 96.5%">
+    <hr>
 
-<label>Description</label>
-<textarea id="resultDescription"
-          rows="4"
-          placeholder="Enter result details"></textarea>
+    <h3>📊 School Results — Class & Medium Wise</h3>
 
-<button class="btn" onclick="addResult()">
-➕ Add Result
-</button>
+    <p class="muted">
+      Enter the result percentage for each class and medium.
+    </p>
 
-<div id="resultMsg" class="msg"></div>
+    <div style="overflow-x:auto;">
 
-<hr>
+      <table class="result-table">
 
-<h3>Published Results</h3>
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Kannada Medium<br>Result %</th>
+            <th>English Medium<br>Result %</th>
+          </tr>
+        </thead>
 
-<div id="resultList"></div>
+        <tbody>
 
-</div>
+          <tr>
+            <td>1</td>
+            <td><input id="result_1_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_1_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>2</td>
+            <td><input id="result_2_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_2_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>3</td>
+            <td><input id="result_3_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_3_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>4</td>
+            <td><input id="result_4_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_4_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>5</td>
+            <td><input id="result_5_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_5_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>6</td>
+            <td><input id="result_6_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_6_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>7</td>
+            <td><input id="result_7_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_7_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>8</td>
+            <td><input id="result_8_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_8_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>9</td>
+            <td><input id="result_9_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_9_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>10</td>
+            <td><input id="result_10_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_10_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>11</td>
+            <td><input id="result_11_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_11_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>12</td>
+            <td><input id="result_12_kannada" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="result_12_english" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <hr>
+
+    <h3>🏆 Class Toppers — Medium Wise</h3>
+
+    <p class="muted">
+      Enter the topper name and percentage for each class and medium.
+    </p>
+
+    <div style="overflow-x:auto;">
+
+      <table class="result-table">
+
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Kannada Medium<br>Topper</th>
+            <th>%</th>
+            <th>English Medium<br>Topper</th>
+            <th>%</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr>
+            <td>1</td>
+            <td><input id="topper_1_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_1_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_1_english_name" placeholder="Student name"></td>
+            <td><input id="topper_1_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>2</td>
+            <td><input id="topper_2_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_2_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_2_english_name" placeholder="Student name"></td>
+            <td><input id="topper_2_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>3</td>
+            <td><input id="topper_3_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_3_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_3_english_name" placeholder="Student name"></td>
+            <td><input id="topper_3_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>4</td>
+            <td><input id="topper_4_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_4_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_4_english_name" placeholder="Student name"></td>
+            <td><input id="topper_4_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>5</td>
+            <td><input id="topper_5_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_5_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_5_english_name" placeholder="Student name"></td>
+            <td><input id="topper_5_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>6</td>
+            <td><input id="topper_6_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_6_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_6_english_name" placeholder="Student name"></td>
+            <td><input id="topper_6_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>7</td>
+            <td><input id="topper_7_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_7_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_7_english_name" placeholder="Student name"></td>
+            <td><input id="topper_7_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>8</td>
+            <td><input id="topper_8_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_8_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_8_english_name" placeholder="Student name"></td>
+            <td><input id="topper_8_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>9</td>
+            <td><input id="topper_9_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_9_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_9_english_name" placeholder="Student name"></td>
+            <td><input id="topper_9_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>10</td>
+            <td><input id="topper_10_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_10_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_10_english_name" placeholder="Student name"></td>
+            <td><input id="topper_10_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>11</td>
+            <td><input id="topper_11_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_11_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_11_english_name" placeholder="Student name"></td>
+            <td><input id="topper_11_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+          <tr>
+            <td>12</td>
+            <td><input id="topper_12_kannada_name" placeholder="Student name"></td>
+            <td><input id="topper_12_kannada_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+            <td><input id="topper_12_english_name" placeholder="Student name"></td>
+            <td><input id="topper_12_english_percentage" type="number" min="0" max="100" step="0.01" placeholder="%"></td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <br>
+
+    <button class="btn" onclick="saveSchoolResults()">
+      💾 Save Results
+    </button>
+
+    <div id="resultMsg" class="msg"></div>
+
+    <hr>
+
+    <h3>Published Results</h3>
+
+    <div id="resultList"></div>
+
+  </div>
 
 </section>
+
 
  <section id="studentCorner" class="hidden">
 
@@ -1749,232 +1973,459 @@ window.deleteAchievement = async function(
 
   loadAchievements();
 };
-window.loadResults = async function() {
+/* =========================================================
+   RESULTS MANAGEMENT
+   1. Class 1-12 + Medium-wise Results
+   2. Class 1-12 + Medium-wise Toppers
+   ========================================================= */
 
-  const list =
-    document.getElementById("resultList");
+window.loadResults = async function () {
 
-  list.innerHTML = "";
+  const list = document.getElementById("resultList");
+  if (!list) return;
+
+  list.innerHTML = `
+    <div class="card">
+      <h3>📊 Class-wise & Medium-wise Results</h3>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th>Academic Year</th>
+              <th>Examination</th>
+              <th>Class</th>
+              <th>Medium</th>
+              <th>Pass %</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="schoolResultsTable"></tbody>
+        </table>
+      </div>
+
+      <hr>
+
+      <h3>🏆 Class & Medium-wise Toppers</h3>
+
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th>Academic Year</th>
+              <th>Examination</th>
+              <th>Class</th>
+              <th>Medium</th>
+              <th>Student</th>
+              <th>Percentage</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="schoolToppersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  await loadSchoolResults();
+  await loadSchoolToppers();
+};
+
+
+/* =========================================================
+   LOAD SCHOOL RESULTS
+   ========================================================= */
+
+async function loadSchoolResults() {
+
+  const table = document.getElementById("schoolResultsTable");
+  if (!table) return;
+
+  table.innerHTML = `
+    <tr>
+      <td colspan="6">Loading...</td>
+    </tr>
+  `;
 
   const { data, error } = await sb
-    .from("results")
+    .from("school_results")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("academic_year", { ascending: false })
+    .order("class_number", { ascending: true });
 
   if (error) {
-    msg("resultMsg", error.message);
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">${escapeHtml(error.message)}</td>
+      </tr>
+    `;
     return;
   }
 
   if (!data || data.length === 0) {
-    list.innerHTML =
-      '<p class="muted">No results available.</p>';
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="muted">
+          No school results available.
+        </td>
+      </tr>
+    `;
     return;
   }
 
   data.forEach(row => {
 
-    const div =
-      document.createElement("div");
+    const tr = document.createElement("tr");
 
-    div.className = "card";
+    tr.innerHTML = `
+      <td>${escapeHtml(row.academic_year || "")}</td>
 
-    div.innerHTML = `
-      <h3>📊 ${escapeHtml(row.exam_name)}</h3>
+      <td>${escapeHtml(row.exam_name || "")}</td>
 
-      <p class="muted">
-        Academic Year:
-        ${escapeHtml(row.academic_year || "")}
-      </p>
+      <td>${escapeHtml(row.class_number || "")}</td>
 
-      <p>
-        <strong>
-          Result:
-          ${escapeHtml(row.result_value || "")}
-        </strong>
-      </p>
+      <td>${escapeHtml(row.medium || "")}</td>
 
-      <p>
-        ${escapeHtml(row.description || "")}
-      </p>
+      <td>
+        <strong>${escapeHtml(row.pass_percentage ?? "")}%</strong>
+      </td>
 
-      <button class="btn"
-        onclick="editResult(
-          ${row.id},
-          '${encodeURIComponent(row.exam_name)}',
-          '${encodeURIComponent(row.academic_year || "")}',
-          '${encodeURIComponent(row.result_value || "")}',
-          '${encodeURIComponent(row.description || "")}'
-        )">
-        ✏️ Edit
-      </button>
+      <td>
 
-      <button class="btn danger"
-        onclick="deleteResult(
-          ${row.id},
-          '${encodeURIComponent(row.exam_name)}'
-        )">
-        🗑️ Delete
-      </button>
+        <button
+          class="btn"
+          onclick="editSchoolResult('${row.id}')">
+          ✏️ Edit
+        </button>
+
+        <button
+          class="btn danger"
+          onclick="deleteSchoolResult('${row.id}')">
+          🗑️ Delete
+        </button>
+
+      </td>
     `;
 
-    list.appendChild(div);
+    table.appendChild(tr);
   });
-};
+}
 
 
-window.addResult = async function() {
+/* =========================================================
+   LOAD TOPPERS
+   ========================================================= */
 
-  const examName =
-    document.getElementById("resultExamName")
-      .value.trim();
+async function loadSchoolToppers() {
 
-  const academicYear =
-    document.getElementById("resultAcademicYear")
-      .value.trim();
+  const table = document.getElementById("schoolToppersTable");
+  if (!table) return;
 
-  const resultValue =
-    document.getElementById("resultValue")
-      .value.trim();
+  table.innerHTML = `
+    <tr>
+      <td colspan="7">Loading...</td>
+    </tr>
+  `;
 
-  const description =
-    document.getElementById("resultDescription")
-      .value.trim();
-
-  if (!examName) {
-    msg(
-      "resultMsg",
-      "Please enter the examination name."
-    );
-    return;
-  }
-
-  const { error } = await sb
-    .from("results")
-    .insert({
-      exam_name: examName,
-      academic_year: academicYear,
-      result_value: resultValue,
-      description: description
-    });
+  const { data, error } = await sb
+    .from("school_toppers")
+    .select("*")
+    .order("academic_year", { ascending: false })
+    .order("class_number", { ascending: true });
 
   if (error) {
-    msg("resultMsg", error.message);
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="7">${escapeHtml(error.message)}</td>
+      </tr>
+    `;
+
     return;
   }
 
-  msg(
-    "resultMsg",
-    "Result added successfully.",
-    true
+  if (!data || data.length === 0) {
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="7" class="muted">
+          No toppers available.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  data.forEach(row => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+      <td>${escapeHtml(row.academic_year || "")}</td>
+
+      <td>${escapeHtml(row.exam_name || "")}</td>
+
+      <td>${escapeHtml(row.class_number || "")}</td>
+
+      <td>${escapeHtml(row.medium || "")}</td>
+
+      <td>
+        <strong>${escapeHtml(row.student_name || "")}</strong>
+      </td>
+
+      <td>
+        <strong>${escapeHtml(row.percentage ?? "")}%</strong>
+      </td>
+
+      <td>
+
+        <button
+          class="btn"
+          onclick="editSchoolTopper('${row.id}')">
+          ✏️ Edit
+        </button>
+
+        <button
+          class="btn danger"
+          onclick="deleteSchoolTopper('${row.id}')">
+          🗑️ Delete
+        </button>
+
+      </td>
+    `;
+
+    table.appendChild(tr);
+  });
+}
+
+
+/* =========================================================
+   EDIT SCHOOL RESULT
+   ========================================================= */
+
+window.editSchoolResult = async function(id) {
+
+  const { data, error } = await sb
+    .from("school_results")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+
+    alert(error?.message || "Result not found.");
+    return;
+  }
+
+  const academicYear = prompt(
+    "Academic year:",
+    data.academic_year || ""
   );
-
-  document.getElementById("resultExamName").value = "";
-  document.getElementById("resultAcademicYear").value = "";
-  document.getElementById("resultValue").value = "";
-  document.getElementById("resultDescription").value = "";
-
-  loadResults();
-};
-
-
-window.editResult = async function(
-  id,
-  exam,
-  year,
-  result,
-  description
-) {
-
-  const examName =
-    prompt(
-      "Examination name:",
-      decodeURIComponent(exam)
-    );
-
-  if (!examName || !examName.trim()) return;
-
-  const academicYear =
-    prompt(
-      "Academic year:",
-      decodeURIComponent(year)
-    );
 
   if (academicYear === null) return;
 
-  const resultValue =
-    prompt(
-      "Result:",
-      decodeURIComponent(result)
-    );
+  const examName = prompt(
+    "Examination name:",
+    data.exam_name || ""
+  );
 
-  if (resultValue === null) return;
+  if (examName === null) return;
 
-  const desc =
-    prompt(
-      "Description:",
-      decodeURIComponent(description)
-    );
+  const classNumber = prompt(
+    "Class (1-12):",
+    data.class_number || ""
+  );
 
-  if (desc === null) return;
+  if (classNumber === null) return;
 
-  const { error } = await sb
-    .from("results")
+  const medium = prompt(
+    "Medium:",
+    data.medium || ""
+  );
+
+  if (medium === null) return;
+
+  const passPercentage = prompt(
+    "Pass percentage:",
+    data.pass_percentage ?? ""
+  );
+
+  if (passPercentage === null) return;
+
+  const { error: updateError } = await sb
+    .from("school_results")
     .update({
-      exam_name: examName.trim(),
       academic_year: academicYear.trim(),
-      result_value: resultValue.trim(),
-      description: desc.trim()
+      exam_name: examName.trim(),
+      class_number: Number(classNumber),
+      medium: medium.trim(),
+      pass_percentage: Number(passPercentage)
     })
     .eq("id", id);
 
-  if (error) {
-    msg("resultMsg", error.message);
+  if (updateError) {
+
+    alert(updateError.message);
     return;
   }
 
-  msg(
-    "resultMsg",
-    "Result updated successfully.",
-    true
-  );
+  alert("Result updated successfully.");
 
   loadResults();
 };
 
 
-window.deleteResult = async function(
-  id,
-  encodedName
-) {
+/* =========================================================
+   DELETE SCHOOL RESULT
+   ========================================================= */
 
-  const name =
-    decodeURIComponent(encodedName);
+window.deleteSchoolResult = async function(id) {
 
-  if (!confirm(
-    `Delete "${name}" from results?`
-  )) {
-    return;
-  }
+  if (!confirm("Delete this school result?")) return;
 
   const { error } = await sb
-    .from("results")
+    .from("school_results")
     .delete()
     .eq("id", id);
 
   if (error) {
-    msg("resultMsg", error.message);
+
+    alert(error.message);
     return;
   }
 
-  msg(
-    "resultMsg",
-    "Result deleted successfully.",
-    true
-  );
+  alert("Result deleted successfully.");
 
   loadResults();
 };
+
+
+/* =========================================================
+   EDIT TOPPER
+   ========================================================= */
+
+window.editSchoolTopper = async function(id) {
+
+  const { data, error } = await sb
+    .from("school_toppers")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+
+    alert(error?.message || "Topper not found.");
+    return;
+  }
+
+  const academicYear = prompt(
+    "Academic year:",
+    data.academic_year || ""
+  );
+
+  if (academicYear === null) return;
+
+  const examName = prompt(
+    "Examination name:",
+    data.exam_name || ""
+  );
+
+  if (examName === null) return;
+
+  const classNumber = prompt(
+    "Class (1-12):",
+    data.class_number || ""
+  );
+
+  if (classNumber === null) return;
+
+  const medium = prompt(
+    "Medium:",
+    data.medium || ""
+  );
+
+  if (medium === null) return;
+
+  const studentName = prompt(
+    "Student name:",
+    data.student_name || ""
+  );
+
+  if (studentName === null) return;
+
+  const percentage = prompt(
+    "Percentage:",
+    data.percentage ?? ""
+  );
+
+  if (percentage === null) return;
+
+  const { error: updateError } = await sb
+    .from("school_toppers")
+    .update({
+      academic_year: academicYear.trim(),
+      exam_name: examName.trim(),
+      class_number: Number(classNumber),
+      medium: medium.trim(),
+      student_name: studentName.trim(),
+      percentage: Number(percentage)
+    })
+    .eq("id", id);
+
+  if (updateError) {
+
+    alert(updateError.message);
+    return;
+  }
+
+  alert("Topper updated successfully.");
+
+  loadResults();
+};
+
+
+/* =========================================================
+   DELETE TOPPER
+   ========================================================= */
+
+window.deleteSchoolTopper = async function(id) {
+
+  if (!confirm("Delete this topper record?")) return;
+
+  const { error } = await sb
+    .from("school_toppers")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+
+    alert(error.message);
+    return;
+  }
+
+  alert("Topper deleted successfully.");
+
+  loadResults();
+};
+
+
+/* =========================================================
+   SAFE HTML
+   ========================================================= */
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+ 
 window.loadStudentCorner = async function() {
 
   const list =
