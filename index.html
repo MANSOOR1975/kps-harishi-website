@@ -127,6 +127,82 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <div id="staffList" class="cards"></div><div id="staffMsg" class="msg"></div>
 </div></section>
 
+ <section id="admissions" class="hidden">
+
+  <div class="panel">
+
+    <h2>👨‍🎓 Student Strength</h2>
+
+    <p class="muted">
+      Enter student strength for Classes 1 to 12 by medium.
+      Totals are calculated automatically.
+    </p>
+
+    <label>Academic Year</label>
+    <input
+      id="strengthAcademicYear"
+      placeholder="Example: 2026-27"
+    >
+
+    <div style="overflow-x:auto;margin-top:15px">
+
+      <table id="strengthTable"
+             style="width:100%;border-collapse:collapse;min-width:950px">
+
+        <thead>
+          <tr>
+            <th rowspan="2">Class</th>
+
+            <th colspan="3">Kannada Medium</th>
+
+            <th colspan="3">English Medium</th>
+
+            <th colspan="3">Grand Total</th>
+          </tr>
+
+          <tr>
+            <th>Boys</th>
+            <th>Girls</th>
+            <th>Total</th>
+
+            <th>Boys</th>
+            <th>Girls</th>
+            <th>Total</th>
+
+            <th>Boys</th>
+            <th>Girls</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody id="strengthBody"></tbody>
+
+        <tfoot id="strengthFoot"></tfoot>
+
+      </table>
+
+    </div>
+
+    <br>
+
+    <button class="btn" onclick="saveStudentStrength()">
+      💾 Save Student Strength
+    </button>
+
+    <button
+      class="btn secondary"
+      onclick="loadAdmissions()"
+      style="margin-left:8px"
+    >
+      🔄 Reload
+    </button>
+
+    <div id="strengthMsg" class="msg"></div>
+
+  </div>
+
+</section>
+
 <section id="announcements" class="hidden">
 <div class="panel">
 <h2>📢 Announcements</h2>
