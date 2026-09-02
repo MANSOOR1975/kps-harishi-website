@@ -2037,59 +2037,250 @@ window.loadResults = async function () {
    ========================================================= */
 
 async function saveSchoolResults() {
-  const academicYear = document.getElementById("resultAcademicYear").value.trim();
-  const examName = document.getElementById("resultExamName").value.trim();
-  const msgEl = document.getElementById("resultMsg");
+
+  const academicYear =
+    document.getElementById("resultAcademicYear").value.trim();
+
+  const examName =
+    document.getElementById("resultExamName").value.trim();
 
   if (!academicYear || !examName) {
-    msg("resultMsg", "Please enter Examination and Academic Year.");
+    msg(
+      "resultMsg",
+      "Please enter Examination and Academic Year."
+    );
     return;
   }
+
+  /* =========================
+     SAVE SCHOOL RESULTS
+     ========================= */
 
   const rows = [];
 
   for (let classNumber = 1; classNumber <= 12; classNumber++) {
-    const kannadaEl = document.getElementById(`result_${classNumber}_kannada`);
-    const englishEl = document.getElementById(`result_${classNumber}_english`);
 
-    const kannadaValue = kannadaEl?.value.trim();
-    const englishValue = englishEl?.value.trim();
+    const kannadaEl =
+      document.getElementById(`result_${classNumber}_kannada`);
+
+    const englishEl =
+      document.getElementById(`result_${classNumber}_english`);
+
+    const kannadaValue =
+      kannadaEl?.value.trim();
+
+    const englishValue =
+      englishEl?.value.trim();
 
     if (kannadaValue !== "" || englishValue !== "") {
+
       rows.push({
         academic_year: academicYear,
         exam_name: examName,
         class_number: classNumber,
-        kannada_result: kannadaValue === "" ? 0 : Number(kannadaValue),
-        english_result: englishValue === "" ? 0 : Number(englishValue)
+        kannada_result:
+          kannadaValue === "" ? 0 : Number(kannadaValue),
+        english_result:
+          englishValue === "" ? 0 : Number(englishValue)
       });
     }
   }
 
   if (rows.length === 0) {
-    msg("resultMsg", "Please enter at least one class result.");
+    msg(
+      "resultMsg",
+      "Please enter at least one class result."
+    );
     return;
   }
 
-  const { error } = await sb
-    .from("school_results")
-    .upsert(rows, {
-      onConflict: "academic_year,exam_name,class_number"
-    });
+  const { error: resultError } =
+    await sb
+      .from("school_results")
+      .upsert(rows, {
+        onConflict:
+          "academic_year,exam_name,class_number"
+      });
 
-  if (error) {
-    msg("resultMsg", error.message);
+  if (resultError) {
+    msg(
+      "resultMsg",
+      "Result saving failed: " +
+      resultError.message
+    );
     return;
   }
 
-  msg("resultMsg", "School results saved successfully.", true);
+
+  /* =========================
+     SAVE CLASS-WISE TOPPERS
+     ========================= */
+
+  for (let classNumber = 1; classNumber <= 12; classNumber++) {
+
+    const topperData = [
+      {
+        medium: "Kannada Medium",
+        nameId:
+          `topper_${classNumber}_kannada_name`,
+        percentageId:
+          `topper_${classNumber}_kannada_percentage`
+      },
+      {
+        medium: "English Medium",
+        nameId:
+          `topper_${classNumber}_english_name`,
+        percentageId:
+          `topper_${classNumber}_english_percentage`
+      }
+    ];
+
+    for (const topper of topperData) {
+
+      const nameEl =
+        document.getElementById(topper.nameId);
+
+      const percentageEl =
+        document.getElementById(topper.percentageId);
+
+      const studentName =
+        nameEl?.value.trim() || "";
+
+      const percentageValue =
+        percentageEl?.value.trim() || "";
+
+      /* Nothing entered for this medium */
+      if (!studentName && !percentageValue) {
+        continue;
+      }
+
+      /* One entered but the other missing */
+      if (!studentName || !percentageValue) {
+
+        msg(
+          "resultMsg",
+          `Please enter both topper name and percentage for Class ${classNumber} - ${topper.medium}.`
+        );
+
+        return;
+      }
+
+      const percentage =
+        Number(percentageValue);
+
+      if (
+        Number.isNaN(percentage) ||
+        percentage < 0 ||
+        percentage > 100
+      ) {
+
+        msg(
+          "resultMsg",
+          `Invalid topper percentage for Class ${classNumber} - ${topper.medium}.`
+        );
+
+        return;
+      }
+
+
+      /* Find existing topper */
+      const { data: existing, error: findError } =
+        await sb
+          .from("school_toppers")
+          .select("id")
+          .eq("academic_year", academicYear)
+          .eq("exam_name", examName)
+          .eq("class_number", classNumber)
+          .eq("medium", topper.medium)
+          .maybeSingle();
+
+      if (findError) {
+
+        msg(
+          "resultMsg",
+          "Unable to check topper: " +
+          findError.message
+        );
+
+        return;
+      }
+
+
+      const topperRecord = {
+        academic_year: academicYear,
+        exam_name: examName,
+        class_number: classNumber,
+        medium: topper.medium,
+        student_name: studentName,
+        percentage: percentage
+      };
+
+
+      /* Update existing topper */
+      if (existing?.id) {
+
+        const { error: updateError } =
+          await sb
+            .from("school_toppers")
+            .update(topperRecord)
+            .eq("id", existing.id);
+
+        if (updateError) {
+
+          msg(
+            "resultMsg",
+            "Topper update failed: " +
+            updateError.message
+          );
+
+          return;
+        }
+
+      }
+
+      /* Insert new topper */
+      else {
+
+        const { error: insertError } =
+          await sb
+            .from("school_toppers")
+            .insert(topperRecord);
+
+        if (insertError) {
+
+          msg(
+            "resultMsg",
+            "Topper saving failed: " +
+            insertError.message
+          );
+
+          return;
+        }
+      }
+    }
+  }
+
+
+  /* =========================
+     SUCCESS
+     ========================= */
+
+  msg(
+    "resultMsg",
+    "School results and toppers saved successfully.",
+    true
+  );
 
   loadSchoolResults();
+  loadSchoolToppers();
 }
 
- async function loadSchoolResults() {
 
-  const table = document.getElementById("schoolResultsTable");
+async function loadSchoolResults() {
+
+  const table =
+    document.getElementById("schoolResultsTable");
+
   if (!table) return;
 
   table.innerHTML = `
@@ -2098,22 +2289,32 @@ async function saveSchoolResults() {
     </tr>
   `;
 
-  const { data, error } = await sb
-    .from("school_results")
-    .select("*")
-    .order("academic_year", { ascending: false })
-    .order("class_number", { ascending: true });
+  const { data, error } =
+    await sb
+      .from("school_results")
+      .select("*")
+      .order("academic_year", {
+        ascending: false
+      })
+      .order("class_number", {
+        ascending: true
+      });
 
   if (error) {
+
     table.innerHTML = `
       <tr>
-        <td colspan="6">${escapeHtml(error.message)}</td>
+        <td colspan="6">
+          ${escapeHtml(error.message)}
+        </td>
       </tr>
     `;
+
     return;
   }
 
   if (!data || data.length === 0) {
+
     table.innerHTML = `
       <tr>
         <td colspan="6" class="muted">
@@ -2121,44 +2322,104 @@ async function saveSchoolResults() {
         </td>
       </tr>
     `;
+
     return;
   }
 
+
   data.forEach(row => {
 
-    const tr = document.createElement("tr");
+    /* =========================
+       KANNADA MEDIUM
+       ========================= */
 
-    tr.innerHTML = `
-      <td>${escapeHtml(row.academic_year || "")}</td>
+    if (
+      row.kannada_result !== null &&
+      row.kannada_result !== undefined
+    ) {
 
-      <td>${escapeHtml(row.exam_name || "")}</td>
+      const tr =
+        document.createElement("tr");
 
-      <td>${escapeHtml(row.class_number || "")}</td>
+      tr.innerHTML = `
+        <td>${escapeHtml(row.academic_year || "")}</td>
 
-      <td>${escapeHtml(row.medium || "")}</td>
+        <td>${escapeHtml(row.exam_name || "")}</td>
 
-      <td>
-        <strong>${escapeHtml(row.pass_percentage ?? "")}%</strong>
-      </td>
+        <td>Class ${escapeHtml(row.class_number || "")}</td>
 
-      <td>
+        <td>Kannada Medium</td>
 
-        <button
-          class="btn"
-          onclick="editSchoolResult('${row.id}')">
-          ✏️ Edit
-        </button>
+        <td>
+          <strong>
+            ${escapeHtml(row.kannada_result)}%
+          </strong>
+        </td>
 
-        <button
-          class="btn danger"
-          onclick="deleteSchoolResult('${row.id}')">
-          🗑️ Delete
-        </button>
+        <td>
+          <button
+            class="btn"
+            onclick="editSchoolResult('${row.id}')">
+            📝 Edit
+          </button>
 
-      </td>
-    `;
+          <button
+            class="btn danger"
+            onclick="deleteSchoolResult('${row.id}')">
+            🗑️ Delete
+          </button>
+        </td>
+      `;
 
-    table.appendChild(tr);
+      table.appendChild(tr);
+    }
+
+
+    /* =========================
+       ENGLISH MEDIUM
+       ========================= */
+
+    if (
+      row.english_result !== null &&
+      row.english_result !== undefined
+    ) {
+
+      const tr =
+        document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${escapeHtml(row.academic_year || "")}</td>
+
+        <td>${escapeHtml(row.exam_name || "")}</td>
+
+        <td>Class ${escapeHtml(row.class_number || "")}</td>
+
+        <td>English Medium</td>
+
+        <td>
+          <strong>
+            ${escapeHtml(row.english_result)}%
+          </strong>
+        </td>
+
+        <td>
+          <button
+            class="btn"
+            onclick="editSchoolResult('${row.id}')">
+            📝 Edit
+          </button>
+
+          <button
+            class="btn danger"
+            onclick="deleteSchoolResult('${row.id}')">
+            🗑️ Delete
+          </button>
+        </td>
+      `;
+
+      table.appendChild(tr);
+    }
+
   });
 }
 
