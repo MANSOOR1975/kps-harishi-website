@@ -2429,35 +2429,28 @@ async function loadSchoolResults() {
    ========================================================= */
 
 async function loadSchoolToppers() {
-
   const table = document.getElementById("schoolToppersTable");
   if (!table) return;
-
-  table.innerHTML = `
-    <tr>
-      <td colspan="7">Loading...</td>
-    </tr>
-  `;
 
   const { data, error } = await sb
     .from("school_toppers")
     .select("*")
     .order("academic_year", { ascending: false })
-    .order("class_number", { ascending: true });
+    .order("class_number", { ascending: true })
+    .order("medium", { ascending: true });
 
   if (error) {
-
     table.innerHTML = `
       <tr>
-        <td colspan="7">${escapeHtml(error.message)}</td>
+        <td colspan="7">
+          ${escapeHtml(error.message)}
+        </td>
       </tr>
     `;
-
     return;
   }
 
   if (!data || data.length === 0) {
-
     table.innerHTML = `
       <tr>
         <td colspan="7" class="muted">
@@ -2465,23 +2458,29 @@ async function loadSchoolToppers() {
         </td>
       </tr>
     `;
-
     return;
   }
 
-  data.forEach(row => {
+  table.innerHTML = "";
 
+  data.forEach(row => {
     const tr = document.createElement("tr");
 
-    tr.innerHTML = `
+    const displayMedium =
+      row.medium === "Kannada"
+        ? "Kannada Medium"
+        : row.medium === "English"
+          ? "English Medium"
+          : row.medium || "";
 
+    tr.innerHTML = `
       <td>${escapeHtml(row.academic_year || "")}</td>
 
       <td>${escapeHtml(row.exam_name || "")}</td>
 
       <td>${escapeHtml(row.class_number || "")}</td>
 
-      <td>${escapeHtml(row.medium || "")}</td>
+      <td>${escapeHtml(displayMedium)}</td>
 
       <td>
         <strong>${escapeHtml(row.student_name || "")}</strong>
@@ -2492,11 +2491,10 @@ async function loadSchoolToppers() {
       </td>
 
       <td>
-
         <button
           class="btn"
           onclick="editSchoolTopper('${row.id}')">
-          ✏️ Edit
+          📝 Edit
         </button>
 
         <button
@@ -2504,14 +2502,12 @@ async function loadSchoolToppers() {
           onclick="deleteSchoolTopper('${row.id}')">
           🗑️ Delete
         </button>
-
       </td>
     `;
 
     table.appendChild(tr);
   });
 }
-
 
 /* =========================================================
    EDIT SCHOOL RESULT
