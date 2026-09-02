@@ -2283,11 +2283,7 @@ async function loadSchoolResults() {
 
   if (!table) return;
 
-  table.innerHTML = `
-    <tr>
-      <td colspan="6">Loading...</td>
-    </tr>
-  `;
+  table.innerHTML = "";
 
   const { data, error } =
     await sb
@@ -2431,6 +2427,8 @@ async function loadSchoolResults() {
 async function loadSchoolToppers() {
   const table = document.getElementById("schoolToppersTable");
   if (!table) return;
+ 
+ table.innerHTML = "";
 
   const { data, error } = await sb
     .from("school_toppers")
