@@ -136,7 +136,12 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <label>Email</label><input id="email_setting">
 <label>Address</label><textarea id="address" rows="3"></textarea>
 <label>Google Maps</label><input id="google_maps">
-<button class="btn" onclick="saveSettings()">Save School Information</button>
+<hr>
+<h3>👋 Public Website Welcome Message</h3>
+<label>Welcome heading</label><input id="welcome_heading" placeholder="Welcome to KPS Harishi">
+<label>Welcome message</label><textarea id="welcome_message" rows="4" placeholder="Nurturing minds, inspiring excellence and building a better tomorrow."></textarea>
+<p class="muted" style="font-size:13px">This message appears on the public website homepage.</p>
+<button class="btn" onclick="saveSettings()">Save School Information & Welcome Message</button>
 <div id="settingsMsg" class="msg"></div>
 </div></section>
 
@@ -770,7 +775,7 @@ async function deletePhoto(encoded) {
  msg("galleryMsg","Photo deleted.",true); loadGallery();
 }
 
-const keys=["school_name","vision","mission","phone_1","phone_2","email","address","google_maps"];
+const keys=["school_name","vision","mission","phone_1","phone_2","email","address","google_maps","welcome_heading","welcome_message"];
 
 /* =========================================================
    HOMEPAGE BACKGROUND PHOTOS
@@ -877,7 +882,9 @@ async function saveSettings() {
   phone_2:document.getElementById("phone_2").value,
   email:document.getElementById("email_setting").value,
   address:document.getElementById("address").value,
-  google_maps:document.getElementById("google_maps").value
+  google_maps:document.getElementById("google_maps").value,
+  welcome_heading:document.getElementById("welcome_heading").value,
+  welcome_message:document.getElementById("welcome_message").value
  };
  const rows=Object.entries(values).map(([setting_key,setting_value])=>({setting_key,setting_value}));
  const {error}=await sb.from("site_settings").upsert(rows,{onConflict:"setting_key"});
