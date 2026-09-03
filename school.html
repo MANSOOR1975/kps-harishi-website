@@ -166,6 +166,38 @@ footer p{margin:7px 0}
 .gallery-video{width:100%;height:230px;object-fit:cover;background:#081b2e;display:block}
 @media(max-width:600px){.module-card{padding:17px}.gallery-video{height:200px}.resource-card{padding:17px}}
 
+
+/* Homepage background slider */
+.home-hero{position:relative;min-height:430px;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(18,59,104,.20);background:linear-gradient(135deg,#082d55,#1769aa,#16835b);margin-bottom:28px}
+.home-hero-slides{position:absolute;inset:0}
+.home-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity .9s ease;background-position:center;background-size:cover;background-repeat:no-repeat}
+.home-hero-slide.active{opacity:1}
+.home-hero-slide:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,25,47,.78),rgba(4,25,47,.35) 55%,rgba(4,25,47,.12))}
+.home-hero-content{position:relative;z-index:3;min-height:430px;display:flex;align-items:center;padding:45px clamp(25px,6vw,75px);color:#fff;max-width:760px}
+.home-hero-content h2{font-size:clamp(32px,5vw,58px);margin:0 0 12px;line-height:1.05}
+.home-hero-content p{font-size:clamp(16px,2vw,21px);line-height:1.6;margin:8px 0;color:#f5f9ff}
+.hero-kicker{display:inline-block;background:rgba(244,180,0,.95);color:#17324d;padding:8px 14px;border-radius:999px;font-weight:800;margin-bottom:15px}
+.hero-dots{position:absolute;z-index:5;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.hero-dot{width:10px;height:10px;border-radius:50%;border:2px solid #fff;background:rgba(255,255,255,.5);cursor:pointer;padding:0}
+.hero-dot.active{background:#fff;transform:scale(1.25)}
+.hero-arrow{position:absolute;z-index:5;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:50%;background:rgba(0,0,0,.38);color:#fff;font-size:26px;cursor:pointer}
+.hero-arrow:hover{background:rgba(0,0,0,.65)}
+.hero-prev{left:18px}.hero-next{right:18px}
+.home-about{margin-top:0}
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.resource-card{background:#fff;border-radius:16px;padding:20px;border:1px solid #e6edf4;box-shadow:0 8px 22px rgba(18,59,104,.08);border-top:4px solid var(--blue)}
+.resource-card.video-card{border-top-color:var(--purple)}
+.resource-meta{font-size:13px;font-weight:700;color:var(--green);margin:8px 0 12px}
+.resource-btn{display:inline-block;margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--navy);color:#fff;text-decoration:none;font-weight:700}
+.resource-btn:hover{background:var(--blue)}
+.results-table-wrap,.strength-table-wrap{overflow-x:auto;border-radius:15px}
+.results-table,.strength-table{min-width:720px}
+.module-card{background:#fff;border-radius:18px;padding:22px;margin-bottom:22px;box-shadow:var(--shadow);border:1px solid #e5edf5}
+.result-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:16px}.result-head h3{margin:0;color:var(--navy)}
+.module-subtitle{margin:7px 0 0;color:#68798a}.year-badge{background:#eaf6ff;color:var(--blue);font-weight:800;padding:9px 13px;border-radius:999px;white-space:nowrap}
+.percent{font-weight:800;color:var(--green)}.topper-name{font-weight:700}
+@media(max-width:600px){.home-hero,.home-hero-content{min-height:360px}.home-hero-content{padding:35px 28px}.hero-arrow{width:38px;height:38px;font-size:22px}.result-head{display:block}.year-badge{display:inline-block;margin-top:12px}.module-card{padding:16px}}
+
 </style>
 
 </head>
@@ -191,6 +223,20 @@ footer p{margin:7px 0}
 </nav>
 
 <section id="home">
+  <div class="home-hero" id="homeHero" aria-label="KPS Harishi school photos">
+  <div class="home-hero-slides" id="homeHeroSlides"></div>
+  <div class="home-hero-content">
+    <div>
+      <span class="hero-kicker">🏫 Karnataka Public School, Harishi</span>
+      <h2>Welcome to KPS Harishi</h2>
+      <p>Nurturing minds, inspiring excellence and building a better tomorrow.</p>
+    </div>
+  </div>
+  <button class="hero-arrow hero-prev" type="button" aria-label="Previous photo" onclick="changeHeroSlide(-1)">‹</button>
+  <button class="hero-arrow hero-next" type="button" aria-label="Next photo" onclick="changeHeroSlide(1)">›</button>
+  <div class="hero-dots" id="heroDots"></div>
+</div>
+
   <h2 class="section-title">About Our School</h2>
 
   <div class="about">
@@ -314,7 +360,89 @@ const sb = window.supabase.createClient(
 );
 
 const BUCKET = "school-gallery";
+const HOMEPAGE_BACKGROUND_BUCKET = "homepage-backgrounds";
+let heroIndex = 0;
+let heroTimer = null;
 
+
+
+/* =========================================================
+   HOMEPAGE BACKGROUND SLIDER
+   Reads photos uploaded by the admin from the public bucket.
+   ========================================================= */
+async function loadHomepageBackgrounds() {
+  const slides = document.getElementById("homeHeroSlides");
+  const dots = document.getElementById("heroDots");
+  if (!slides || !dots) return;
+
+  const { data, error } = await sb.storage
+    .from(HOMEPAGE_BACKGROUND_BUCKET)
+    .list("", { limit: 100, sortBy: { column: "created_at", order: "asc" } });
+
+  if (error) {
+    console.error("Homepage backgrounds:", error);
+    renderFallbackHero(slides, dots);
+    return;
+  }
+
+  const files = (data || []).filter(f => f.name && !f.name.startsWith("."));
+  if (!files.length) {
+    renderFallbackHero(slides, dots);
+    return;
+  }
+
+  slides.innerHTML = "";
+  dots.innerHTML = "";
+
+  files.forEach((file, index) => {
+    const { data: urlData } = sb.storage.from(HOMEPAGE_BACKGROUND_BUCKET).getPublicUrl(file.name);
+    const slide = document.createElement("div");
+    slide.className = "home-hero-slide" + (index === 0 ? " active" : "");
+    slide.style.backgroundImage = `url("${urlData.publicUrl}")`;
+    slide.setAttribute("role", "img");
+    slide.setAttribute("aria-label", "KPS Harishi school photo");
+    slides.appendChild(slide);
+
+    const dot = document.createElement("button");
+    dot.className = "hero-dot" + (index === 0 ? " active" : "");
+    dot.type = "button";
+    dot.setAttribute("aria-label", `Show school photo ${index + 1}`);
+    dot.onclick = () => showHeroSlide(index);
+    dots.appendChild(dot);
+  });
+
+  heroIndex = 0;
+  startHeroTimer(files.length);
+}
+
+function renderFallbackHero(slides, dots) {
+  slides.innerHTML = '<div class="home-hero-slide active" style="background-image:linear-gradient(135deg,#082d55,#1769aa,#16835b)"></div>';
+  dots.innerHTML = '';
+  if (heroTimer) clearInterval(heroTimer);
+}
+
+function showHeroSlide(index) {
+  const slides = [...document.querySelectorAll(".home-hero-slide")];
+  const dots = [...document.querySelectorAll(".hero-dot")];
+  if (!slides.length) return;
+  heroIndex = (index + slides.length) % slides.length;
+  slides.forEach((s, i) => s.classList.toggle("active", i === heroIndex));
+  dots.forEach((d, i) => d.classList.toggle("active", i === heroIndex));
+}
+
+function changeHeroSlide(step) {
+  const slides = document.querySelectorAll(".home-hero-slide");
+  if (!slides.length) return;
+  showHeroSlide(heroIndex + step);
+  startHeroTimer(slides.length);
+}
+
+function startHeroTimer(count) {
+  if (heroTimer) clearInterval(heroTimer);
+  if (count > 1) {
+    heroTimer = setInterval(() => showHeroSlide(heroIndex + 1), 5000);
+  }
+}
 
 /* =========================
    LOAD STAFF
@@ -829,6 +957,7 @@ function escapeHtml(value) {
    START
 ========================= */
 
+loadHomepageBackgrounds();
 loadStaff();
 loadGallery();
 loadAnnouncements();
