@@ -8,525 +8,166 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
 <style>
-* {
-  box-sizing: border-box;
+:root{
+  --navy:#123b68; --blue:#1769aa; --sky:#eaf6ff; --gold:#f4b400;
+  --green:#16835b; --red:#d64545; --purple:#7357c9; --ink:#17324d;
+  --card:#ffffff; --shadow:0 10px 28px rgba(18,59,104,.12);
 }
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f7fb;
-  color: #17324d;
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);
+  background:linear-gradient(180deg,#f4f9ff 0%,#fff 35%,#f5fbf8 100%);
 }
-
-header {
-  background: #123b68;
-  color: white;
-  padding: 28px 20px;
-  text-align: center;
+header{
+  position:relative;overflow:hidden;color:#fff;text-align:center;
+  padding:58px 20px 52px;
+  background:linear-gradient(135deg,#082d55 0%,#1769aa 55%,#16835b 100%);
 }
-
-header h1 {
-  margin: 0;
-  font-size: 32px;
+header:before,header:after{
+  content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.10);
 }
+header:before{width:260px;height:260px;right:-90px;top:-100px}
+header:after{width:180px;height:180px;left:-70px;bottom:-90px}
+header h1{position:relative;margin:0;font-size:clamp(30px,5vw,52px);letter-spacing:.3px}
+header p{position:relative;margin:10px 0 0;font-size:clamp(15px,2.2vw,20px)}
+header p:last-child{color:#ffe082;font-weight:700}
 
-header p {
-  margin: 8px 0 0;
-  font-size: 16px;
+nav{
+  position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);
+  padding:12px 10px;box-shadow:0 3px 18px rgba(0,0,0,.12);
+  text-align:center;backdrop-filter:blur(8px);
 }
-
-nav {
-  background: white;
-  padding: 12px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,.1);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+nav a{
+  display:inline-block;text-decoration:none;color:var(--navy);font-weight:700;
+  margin:4px 6px;padding:9px 12px;border-radius:22px;transition:.2s;
 }
+nav a:hover{background:#eaf3fb;color:var(--blue);transform:translateY(-1px)}
 
-nav a {
-  text-decoration: none;
-  color: #123b68;
-  font-weight: bold;
-  margin: 0 14px;
+section{max-width:1200px;margin:38px auto;padding:0 18px}
+.section-title{
+  text-align:center;color:var(--navy);font-size:clamp(24px,4vw,34px);
+  margin:0 0 22px;position:relative
 }
-
-section {
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 18px;
+.section-title:after{
+  content:"";display:block;width:62px;height:4px;border-radius:5px;
+  background:linear-gradient(90deg,var(--gold),var(--green));margin:10px auto 0
 }
-
-.section-title {
-  text-align: center;
-  color: #123b68;
-  margin-bottom: 20px;
+.about,.info-card,.staff-card{
+  background:rgba(255,255,255,.95);border-radius:18px;box-shadow:var(--shadow);
 }
+.about{padding:28px;line-height:1.8;border-top:5px solid var(--gold)}
+.about h3{color:var(--navy);font-size:25px;margin-top:0}
 
-.about {
-  background: white;
-  padding: 25px;
-  border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.08);
-  line-height: 1.7;
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.info-card{padding:23px;border:1px solid #e8eef5;transition:.2s}
+.info-card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(18,59,104,.16)}
+.info-card h3{margin:0 0 10px;color:var(--navy)}
+.info-date{font-size:13px;color:#68798a;margin-bottom:10px}
+.info-result{font-size:28px;font-weight:800;color:var(--green);margin:12px 0}
+.info-link{
+  display:inline-block;margin-top:12px;padding:10px 15px;border-radius:10px;
+  background:var(--navy);color:#fff;text-decoration:none;font-weight:700
 }
+.info-link:hover{background:var(--blue)}
 
-.staff-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 18px;
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.staff-card{
+  padding:22px;text-align:center;overflow:hidden;min-height:235px;
+  transition:.2s
 }
-
-.staff-card {
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+.staff-card:hover{transform:translateY(-4px)}
+.staff-card img.staff-photo{
+  display:block;width:125px;height:125px;object-fit:cover;margin:0 auto 13px;
+  border-radius:50%;border:5px solid #eaf3fb;box-shadow:0 5px 15px rgba(0,0,0,.12)
 }
-
-.staff-card h3 {
-  margin: 0 0 7px;
-  color: #123b68;
-}
-
-.staff-card p {
-  margin: 0;
-  color: #555;
-}
-
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.gallery img {
-  width: 100%;
-  height: 230px;
-  object-fit: cover;
-  border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.15);
-}
-
-.message {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-}
- /* Scrolling announcements */
-  
-/* Announcement Ticker */
-#announcementList {
-    overflow: hidden;
-    width: 100%;
-}
-
-.announcement-ticker {
-    width: 100%;
-    overflow: hidden;
-}
-
-.announcement-track {
-    display: flex;
-    width: max-content;
-    animation: announcementScroll 30s linear infinite;
-}
-
-.announcement-group {
-    display: flex;
-    align-items: center;
-    gap: 40px;
-    flex-shrink: 0;
-    padding-right: 40px;
-}
-
-.announcement-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-@keyframes announcementScroll {
-    from {
-        transform: translateX(0);
-    }
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-/* Mobile slower */
-@media (max-width: 600px) {
-    .announcement-track {
-        animation-duration: 90s;
-    }
-}
-
-footer {
-  margin-top: 50px;
-  background: #123b68;
-  color: white;
-  text-align: center;
-  padding: 25px;
-}
-
-@media(max-width:600px) {
-  header h1 {
-    font-size: 25px;
-  }
-
-  nav a {
-    display: inline-block;
-    margin: 6px 8px;
-  }
-
-  .gallery img {
-    height: 200px;
-  }
- /* Gallery Lightbox */
-.gallery img {
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.gallery img:hover {
-    transform: scale(1.02);
-}
-
-/* Gallery Lightbox */
-
-.lightbox {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    display: none;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 2147483647 !important;
-    padding: 20px !important;
-    box-sizing: border-box !important;
-}
-
-. {
-    width: auto !important;
-    height: auto !important;
-    max-width: 50vw !important;
-    max-height: 50vh !important;
-    object-fit: contain !important;
-    border-radius: 10px !important;
-}
-
-.lightbox .close {
-    position: absolute !important;
-    top: 20px !important;
-    right: 25px !important;
-    width: 55px !important;
-    height: 55px !important;
-    background: #000 !important;
-    color: #fff !important;
-    font-size: 42px !important;
-    line-height: 50px !important;
-    text-align: center !important;
-    border-radius: 50% !important;
-    cursor: pointer !important;
-    z-index: 999999 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-  /* =====================================
-   ANNOUNCEMENT MOVING TICKER
-   ===================================== */
-
-#announcementList {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    padding: 12px 0;
-}
-
-.announcement-track {
-    display: flex !important;
-    flex-direction: row !important;
-    width: max-content !important;
-    min-width: max-content !important;
-    animation: announcementMove 5s linear infinite !important;
-    will-change: transform;
-}
-
-.announcement-group {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    width: max-content !important;
-    min-width: max-content !important;
-    flex: 0 0 auto !important;
-    align-items: center;
-}
-
-.announcement-item {
-    display: inline-flex !important;
-    align-items: center;
-    white-space: nowrap !important;
-    flex: 0 0 auto !important;
-    padding: 0 30px;
-}
-
-@keyframes announcementMove {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-.announcement-icon {
-    font-size: 20px;
-    margin-right: 8px;
-}
-
-.announcement-item strong {
-    font-weight: 700;
-    margin-right: 12px;
-}
-
-.announcement-date {
-    font-size: 14px;
-    margin-right: 15px;
-    opacity: 0.7;
-}
-
-.announcement-content {
-    font-weight: 500;
-}
-
-
-
-/* Pause when mouse is over announcement */
-.announcement-ticker:hover .announcement-track {
-    animation-play-state: paused;
-}
-
-
-/* Mobile */
-@media (max-width: 600px) {
-
-    .announcement-item {
-        font-size: 15px;
-        padding: 0 25px;
-    }
-
-    .announcement-icon {
-        font-size: 18px;
-    }
-
-    .announcement-date {
-        font-size: 12px;
-    }
-
-}
-  /* Desktop announcement ticker fix */
-@media (min-width: 601px) {
-    #announcementList {
-        overflow: hidden !important;
-    }
-
-    .announcement-track {
-    display: flex !important;
-    flex-direction: row !important;
-    width: max-content !important;
-    min-width: max-content !important;
-    animation: announcementMove 15s linear infinite !important;
-    animation-play-state: running !important;
-    will-change: transform !important;
-}
-
-.announcement-group {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    width: max-content !important;
-    min-width: max-content !important;
-    flex: 0 0 auto !important;
-    align-items: center !important;
-}
-
-  .staff-card img.staff-photo {
-    width: 120px !important;
-    height: 120px !important;
-    max-width: 120px !important;
-    max-height: 120px !important;
-    min-width: 120px !important;
-    min-height: 120px !important;
-    object-fit: cover !important;
-    display: block !important;
-    margin: 0 auto 12px !important;
-    border-radius: 12px !important;
-    border: 1px solid #ddd;
-}
-
 .staff-photo-placeholder{
-  width:120px;
-  height:120px;
-  border-radius:12px;
-  margin:0 auto 12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#eef2f7;
-  font-size:42px;
+  width:125px;height:125px;border-radius:50%;margin:0 auto 13px;
+  display:flex;align-items:center;justify-content:center;background:#eaf3fb;font-size:42px
+}
+.staff-card h3{margin:0 0 7px;color:var(--navy)}
+.staff-card p{margin:0;color:#596b7c}
+
+.gallery{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px
+}
+.gallery > div{
+  background:#fff;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);
+  transition:.2s
+}
+.gallery > div:hover{transform:translateY(-4px)}
+.gallery img,.gallery video{
+  width:100%;height:230px;object-fit:cover;display:block
+}
+.gallery video{background:#0d1b2a}
+.message{
+  text-align:center;padding:22px;color:#667788;background:#fff;border-radius:14px;
+  box-shadow:0 4px 16px rgba(18,59,104,.07)
 }
 
-.staff-card {
-    overflow: hidden;
+/* Announcement ticker */
+#announcementList{overflow:hidden;width:100%;padding:12px 0}
+.announcement-ticker{width:100%;overflow:hidden;border-radius:15px;background:#fff;box-shadow:var(--shadow)}
+.announcement-track{display:flex;width:max-content;animation:announcementMove 22s linear infinite}
+.announcement-group{display:flex;align-items:center;gap:0;flex-shrink:0}
+.announcement-item{display:inline-flex;align-items:center;white-space:nowrap;padding:15px 30px}
+.announcement-icon{font-size:20px;margin-right:8px}.announcement-item strong{margin-right:12px}
+.announcement-date{font-size:13px;margin-right:15px;opacity:.7}.announcement-content{font-weight:500}
+.announcement-ticker:hover .announcement-track{animation-play-state:paused}
+@keyframes announcementMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* Results / strength tables */
+#resultList .result-table-wrap,#studentStrengthList .strength-table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border-radius:15px;overflow:hidden;box-shadow:var(--shadow)}
+th{background:var(--navy);color:#fff;padding:13px 10px;text-align:center}
+td{padding:11px 10px;text-align:center;border-bottom:1px solid #edf1f5}
+tr:nth-child(even) td{background:#f7fbff}
+tr:last-child td{border-bottom:0}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;font-weight:700;background:#e7f6ee;color:var(--green)}
+
+footer{
+  margin-top:55px;background:linear-gradient(135deg,#082d55,#123b68);
+  color:#fff;text-align:center;padding:32px 20px
+}
+footer p{margin:7px 0}
+
+@media(max-width:600px){
+  nav{padding:9px 6px} nav a{font-size:13px;margin:3px 2px;padding:8px 9px}
+  section{margin:28px auto;padding:0 12px}
+  header{padding:44px 15px}
+  .about{padding:20px}
+  .gallery img,.gallery video{height:200px}
+  .announcement-track{animation-duration:70s}
+  .announcement-item{font-size:14px;padding:13px 22px}
 }
 
-.staff-card h3,
-.staff-card p {
-    display: block;
-}
-
-  /* FINAL STAFF CARD FIX */
-.staff-grid {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-    gap: 20px !important;
-}
-
-.staff-card {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    text-align: center !important;
-    overflow: hidden !important;
-    min-height: 220px !important;
-}
-
-.staff-card img.staff-photo {
-    display: block !important;
-    width: 120px !important;
-    height: 120px !important;
-    min-width: 120px !important;
-    min-height: 120px !important;
-    max-width: 120px !important;
-    max-height: 120px !important;
-    object-fit: cover !important;
-    flex: 0 0 120px !important;
-    margin: 0 auto 12px !important;
-    border-radius: 12px !important;
-}
-
-.staff-card h3 {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 0 7px !important;
-}
-
-.staff-card p {
-    display: block !important;
-    width: 100% !important;
-    margin: 0 !important;
-}
-
-  /* =====================================
-   SCHOOL INFORMATION SECTIONS
-   ===================================== */
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.info-card {
-  background: white;
-  padding: 22px;
-  border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.08);
-  border-left: 5px solid #123b68;
-}
-
-.info-card h3 {
-  margin: 0 0 10px;
-  color: #123b68;
-  font-size: 20px;
-}
-
-.info-card p {
-  margin: 8px 0;
-  line-height: 1.6;
-  color: #555;
-}
-
-.info-date {
-  font-size: 13px;
-  color: #777;
-  margin-bottom: 10px;
-}
-
-.info-result {
-  font-size: 22px;
-  font-weight: bold;
-  color: #123b68;
-  margin: 10px 0;
-}
-
-.info-link {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 9px 14px;
-  background: #123b68;
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: bold;
-}
-
-.info-link:hover {
-  opacity: .9;
-}
-
-.department-name {
-  font-size: 13px;
-  font-weight: bold;
-  color: #666;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-  /* Responsive gallery lightbox */
-#lightbox {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 9999;
-    padding: 10px;
-}
-
-#lightbox img {
-    display: block !important;
-    width: auto !important;
-    height: auto !important;
-    max-width: 800px !important;
-    max-height: 70vh !important;
-    object-fit: contain !important;
-    border-radius: 12px;
-}
+/* Modern public module cards */
+.module-card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-bottom:22px;border:1px solid #e8eef5}
+.module-card h3{margin:0 0 8px;color:var(--navy);font-size:23px}
+.module-subtitle{color:#667788;margin:0 0 18px}
+.result-head,.strength-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.year-badge{display:inline-flex;align-items:center;gap:7px;background:#eef7ff;color:var(--navy);padding:8px 13px;border-radius:999px;font-weight:800}
+.results-table-wrap,.strength-table-wrap{overflow-x:auto;border-radius:15px}
+.results-table td:first-child,.strength-table td:first-child{text-align:left;font-weight:700}
+.percent{font-weight:800;color:var(--green)}
+.topper-name{font-weight:800;color:var(--navy)}
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.resource-card{background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow);border-top:5px solid var(--purple)}
+.resource-card.video-card{border-top-color:var(--red)}
+.resource-meta{font-size:13px;color:#68798a;margin:8px 0}
+.resource-card p{line-height:1.6;color:#526579}
+.resource-btn{display:inline-block;text-decoration:none;background:var(--navy);color:#fff;padding:10px 14px;border-radius:10px;font-weight:800;margin-top:7px}
+.resource-btn:hover{background:var(--blue)}
+.no-data{grid-column:1/-1}
+.gallery-card{position:relative}
+.gallery-label{padding:10px 13px;font-size:13px;color:#667788;background:#fff}
+.gallery-video{width:100%;height:230px;object-fit:cover;background:#081b2e;display:block}
+@media(max-width:600px){.module-card{padding:17px}.gallery-video{height:200px}.resource-card{padding:17px}}
 
 </style>
+
 </head>
 
 <body>
@@ -542,6 +183,7 @@ footer {
   <a href="#announcements">Announcements</a>
   <a href="#achievements">Achievements</a>
   <a href="#results">Results</a>
+  <a href="#student-strength">Student Strength</a>
   <a href="#student-corner">Student Corner</a>
   <a href="#department-links">Useful Links</a>
   <a href="#staff">Staff</a>
@@ -566,16 +208,24 @@ footer {
     </p>
   </div>
 </section>
-  
+
+<section aria-label="Quick access">
+  <div class="info-grid">
+    <div class="info-card" style="border-top:5px solid #f4b400"><h3>📊 Results</h3><p>View examination results and achievements.</p><a class="info-link" href="#results">View Results</a></div>
+    <div class="info-card" style="border-top:5px solid #16835b"><h3>👨‍🎓 Student Strength</h3><p>See class-wise student strength.</p><a class="info-link" href="#student-strength">View Strength</a></div>
+    <div class="info-card" style="border-top:5px solid #7357c9"><h3>📚 Student Corner</h3><p>Study resources and useful learning links.</p><a class="info-link" href="#student-corner">Explore</a></div>
+    <div class="info-card" style="border-top:5px solid #d64545"><h3>📷 Gallery</h3><p>Photos and videos from KPS Harishi.</p><a class="info-link" href="#gallery">View Gallery</a></div>
+  </div>
+</section>
+
 <section id="announcements">
+  <h2 class="section-title">📢 Announcements</h2>
+  <div id="announcementList">
+    <div class="message">Loading announcements...</div>
+  </div>
+</section>
 
-    <h2 class="section-title">📢 Announcements</h2>
-
-    <div id="announcementList">
-        <div class="message">Loading announcements...</div>
-    </div>
-
-  <section id="achievements">
+<section id="achievements">
   <h2 class="section-title">🏆 Achievements</h2>
   <div id="achievementList" class="info-grid">
     <div class="message">Loading achievements...</div>
@@ -583,15 +233,22 @@ footer {
 </section>
 
 <section id="results">
-  <h2 class="section-title">📊 Results</h2>
-  <div id="resultList" class="info-grid">
+  <h2 class="section-title">📊 Examination Results</h2>
+  <div id="resultList">
     <div class="message">Loading results...</div>
+  </div>
+</section>
+
+<section id="student-strength">
+  <h2 class="section-title">👨‍🎓 Student Strength</h2>
+  <div id="studentStrengthList">
+    <div class="message">Loading student strength...</div>
   </div>
 </section>
 
 <section id="student-corner">
   <h2 class="section-title">🎓 Student Corner</h2>
-  <div id="studentResourceList" class="info-grid">
+  <div id="studentResourceList">
     <div class="message">Loading student resources...</div>
   </div>
 </section>
@@ -601,9 +258,6 @@ footer {
   <div id="departmentLinkList" class="info-grid">
     <div class="message">Loading useful links...</div>
   </div>
-</section>
-
-
 </section>
 
 <section id="staff">
@@ -816,83 +470,62 @@ async function loadStaff() {
 ========================= */
 
 async function loadGallery() {
-
-  const container =
-    document.getElementById("galleryList");
-
-container.style.display = "grid";
-container.style.gridTemplateColumns = "repeat(auto-fit, minmax(250px, 1fr))";
-container.style.gap = "20px";
-container.style.width = "100%";
-
-  const { data, error } =
-    await sb.storage
-      .from(BUCKET)
-      .list("", {
-        limit: 100,
-        sortBy: {
-          column: "created_at",
-          order: "desc"
-        }
-      });
+  const container = document.getElementById("galleryList");
+  const { data, error } = await sb.storage.from(BUCKET).list("", {
+    limit: 100,
+    sortBy: { column: "created_at", order: "desc" }
+  });
 
   if (error) {
-
-    console.error(error);
-
-    container.innerHTML =
-      '<div class="message">Unable to load gallery.</div>';
-
+    console.error("Gallery:", error);
+    container.innerHTML = '<div class="message">Unable to load gallery.</div>';
     return;
   }
-
   if (!data || data.length === 0) {
-
-    container.innerHTML =
-      '<div class="message">No photos available.</div>';
-
+    container.innerHTML = '<div class="message">No photos or videos available.</div>';
     return;
   }
 
   container.innerHTML = "";
-
   data.forEach(file => {
-
     if (!file.name) return;
-
-    const {
-      data: publicData
-    } = sb.storage
-      .from(BUCKET)
-      .getPublicUrl(file.name);
+    const { data: publicData } = sb.storage.from(BUCKET).getPublicUrl(file.name);
+    const mime = (file.metadata && file.metadata.mimetype) || "";
+    const lower = file.name.toLowerCase();
+    const isVideo = mime.startsWith("video/") || /\.(mp4|webm|ogg|mov)$/i.test(lower);
 
     const card = document.createElement("div");
+    card.className = "gallery-card";
 
-card.style.background = "#fff";
-card.style.borderRadius = "16px";
-card.style.overflow = "hidden";
-card.style.boxShadow = "0 4px 15px rgba(0,0,0,0.12)";
-card.style.cursor = "pointer";
-
-const img = document.createElement("img");
-
-img.src = publicData.publicUrl;
-img.alt = "KPS Harishi School Gallery";
-img.loading = "lazy";
-
-img.style.width = "100%";
-img.style.height = "220px";
-img.style.objectFit = "cover";
-img.style.display = "block";
-
-card.appendChild(img);
-container.appendChild(card);
-
+    if (isVideo) {
+      const video = document.createElement("video");
+      video.className = "gallery-video";
+      video.controls = true;
+      video.preload = "metadata";
+      video.playsInline = true;
+      video.src = publicData.publicUrl;
+      card.appendChild(video);
+      const label = document.createElement("div");
+      label.className = "gallery-label";
+      label.textContent = "🎬 School Video";
+      card.appendChild(label);
+    } else {
+      const img = document.createElement("img");
+      img.src = publicData.publicUrl;
+      img.alt = "KPS Harishi School Gallery";
+      img.loading = "lazy";
+      card.appendChild(img);
+      const label = document.createElement("div");
+      label.className = "gallery-label";
+      label.textContent = "📷 School Photo";
+      card.appendChild(label);
+    }
+    container.appendChild(card);
   });
 }
 
   /* =========================
-   LOAD ACHIEVEMENTS
+    LOAD ACHIEVEMENTS
    ========================= */
 
 async function loadAchievements() {
@@ -963,158 +596,133 @@ async function loadAchievements() {
 
 async function loadResults() {
   const container = document.getElementById("resultList");
+  const [resultsResp, toppersResp] = await Promise.all([
+    sb.from("school_results").select("academic_year, exam_name, class_number, kannada_result, english_result").order("academic_year", {ascending:false}).order("class_number", {ascending:true}),
+    sb.from("school_toppers").select("academic_year, exam_name, class_number, medium, student_name, percentage").order("academic_year", {ascending:false}).order("class_number", {ascending:true})
+  ]);
 
-  const { data, error } = await sb
-    .from("results")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Results:", error);
-    container.innerHTML =
-      '<div class="message">Unable to load results.</div>';
+  if (resultsResp.error) {
+    console.error("Results:", resultsResp.error);
+    container.innerHTML = '<div class="message">Unable to load examination results.</div>';
+    return;
+  }
+  const results = resultsResp.data || [];
+  const toppers = toppersResp.data || [];
+  if (!results.length && !toppers.length) {
+    container.innerHTML = '<div class="message">No examination results available.</div>';
     return;
   }
 
-  if (!data || data.length === 0) {
-    container.innerHTML =
-      '<div class="message">No results available.</div>';
-    return;
-  }
+  // Public site shows the latest academic year + examination entered by the admin.
+  const first = results[0] || toppers[0];
+  const year = first?.academic_year || "";
+  const exam = first?.exam_name || "";
+  const latestResults = results.filter(r => r.academic_year === year && r.exam_name === exam);
+  const latestToppers = toppers.filter(r => r.academic_year === year && r.exam_name === exam);
 
-  container.innerHTML = "";
-
-  data.forEach(row => {
-
-    const examName =
-      row.exam_name ||
-      row.examination_name ||
-      row.title ||
-      "Examination Result";
-
-    const academicYear =
-      row.academic_year ||
-      row.year ||
-      "";
-
-    const result =
-      row.result ||
-      row.percentage ||
-      "";
-
-    const description =
-      row.description ||
-      row.content ||
-      "";
-
-    const card = document.createElement("div");
-    card.className = "info-card";
-
-    card.innerHTML = `
-      <h3>📊 ${escapeHtml(examName)}</h3>
-
-      ${
-        academicYear
-          ? `<div class="info-date">
-               Academic Year: ${escapeHtml(academicYear)}
-             </div>`
-          : ""
-      }
-
-      ${
-        result
-          ? `<div class="info-result">
-               ${escapeHtml(result)}
-             </div>`
-          : ""
-      }
-
-      ${
-        description
-          ? `<p>${escapeHtml(description)}</p>`
-          : ""
-      }
-    `;
-
-    container.appendChild(card);
+  const resultMap = {};
+  latestResults.forEach(r => resultMap[Number(r.class_number)] = r);
+  const topperMap = {};
+  latestToppers.forEach(r => {
+    const c = Number(r.class_number);
+    topperMap[c] = topperMap[c] || {};
+    topperMap[c][String(r.medium || "").toLowerCase()] = r;
   });
+
+  let resultRows = "";
+  for (let c=1;c<=12;c++) {
+    const r=resultMap[c] || {};
+    resultRows += `<tr><td>Class ${c}</td><td class="percent">${r.kannada_result ?? "—"}${r.kannada_result !== null && r.kannada_result !== undefined ? "%" : ""}</td><td class="percent">${r.english_result ?? "—"}${r.english_result !== null && r.english_result !== undefined ? "%" : ""}</td></tr>`;
+  }
+
+  let topperRows = "";
+  for (let c=1;c<=12;c++) {
+    const k=topperMap[c]?.kannada || {};
+    const e=topperMap[c]?.english || {};
+    topperRows += `<tr><td>Class ${c}</td><td><span class="topper-name">${escapeHtml(k.student_name || "—")}</span>${k.percentage !== undefined && k.percentage !== null ? ` <span class="percent">(${escapeHtml(k.percentage)}%)</span>` : ""}</td><td><span class="topper-name">${escapeHtml(e.student_name || "—")}</span>${e.percentage !== undefined && e.percentage !== null ? ` <span class="percent">(${escapeHtml(e.percentage)}%)</span>` : ""}</td></tr>`;
+  }
+
+  container.innerHTML = `
+    <div class="module-card">
+      <div class="result-head">
+        <div><h3>📈 Class & Medium-wise Results</h3><p class="module-subtitle">School performance for the latest published examination.</p></div>
+        <div class="year-badge">📅 ${escapeHtml(year)}${exam ? ` • ${escapeHtml(exam)}` : ""}</div>
+      </div>
+      <div class="results-table-wrap">
+        <table class="results-table"><thead><tr><th>Class</th><th>Kannada Medium Result %</th><th>English Medium Result %</th></tr></thead><tbody>${resultRows}</tbody></table>
+      </div>
+    </div>
+    <div class="module-card">
+      <div class="result-head">
+        <div><h3>🏆 Class & Medium-wise Toppers</h3><p class="module-subtitle">Top-performing student from each medium, where published.</p></div>
+      </div>
+      <div class="results-table-wrap">
+        <table class="results-table"><thead><tr><th>Class</th><th>Kannada Medium Topper</th><th>English Medium Topper</th></tr></thead><tbody>${topperRows}</tbody></table>
+      </div>
+    </div>`;
 }
 
 
+
 /* =========================
-   LOAD STUDENT CORNER
+    LOAD STUDENT STRENGTH
+========================= */
+
+async function loadStudentStrength() {
+  const container = document.getElementById("studentStrengthList");
+  const { data, error } = await sb.from("student_strength")
+    .select("academic_year, class_number, kannada_boys, kannada_girls, english_boys, english_girls")
+    .order("academic_year", {ascending:false})
+    .order("class_number", {ascending:true});
+
+  if (error) {
+    console.error("Student Strength:", error);
+    container.innerHTML = '<div class="message">Unable to load student strength.</div>';
+    return;
+  }
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="message">No student strength information available.</div>';
+    return;
+  }
+  const year=data[0].academic_year || "";
+  const rows=data.filter(r=>r.academic_year===year).sort((a,b)=>Number(a.class_number)-Number(b.class_number));
+  let kb=0,kg=0,eb=0,eg=0;
+  const body=rows.map(r=>{
+    const a=Number(r.kannada_boys||0),b=Number(r.kannada_girls||0),c=Number(r.english_boys||0),d=Number(r.english_girls||0);
+    kb+=a;kg+=b;eb+=c;eg+=d;
+    return `<tr><td>Class ${escapeHtml(r.class_number)}</td><td>${a}</td><td>${b}</td><td><strong>${a+b}</strong></td><td>${c}</td><td>${d}</td><td><strong>${c+d}</strong></td><td>${a+c}</td><td>${b+d}</td><td><strong>${a+b+c+d}</strong></td></tr>`;
+  }).join("");
+  container.innerHTML=`<div class="module-card"><div class="result-head"><div><h3>👥 Class-wise Student Strength</h3><p class="module-subtitle">Current published student strength by medium and gender.</p></div><div class="year-badge">📅 ${escapeHtml(year)}</div></div><div class="strength-table-wrap"><table class="strength-table"><thead><tr><th rowspan="2">Class</th><th colspan="3">Kannada Medium</th><th colspan="3">English Medium</th><th colspan="3">Grand Total</th></tr><tr><th>Boys</th><th>Girls</th><th>Total</th><th>Boys</th><th>Girls</th><th>Total</th><th>Boys</th><th>Girls</th><th>Total</th></tr></thead><tbody>${body}</tbody><tfoot><tr><td>Total</td><td>${kb}</td><td>${kg}</td><td>${kb+kg}</td><td>${eb}</td><td>${eg}</td><td>${eb+eg}</td><td>${kb+eb}</td><td>${kg+eg}</td><td>${kb+kg+eb+eg}</td></tr></tfoot></table></div></div>`;
+}
+
+/* =========================
+    LOAD STUDENT CORNER
    ========================= */
 
 async function loadStudentCorner() {
-  const container =
-    document.getElementById("studentResourceList");
+  const container = document.getElementById("studentResourceList");
+  const [pdfResp, linkResp] = await Promise.all([
+    sb.from("student_resources").select("title, description, class_number, medium, file_url, created_at").order("created_at", {ascending:false}),
+    sb.from("student_corner").select("title, description, link_url, created_at").order("created_at", {ascending:false})
+  ]);
 
-  const { data, error } = await sb
-    .from("student_resources")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Student Corner:", error);
-    container.innerHTML =
-      '<div class="message">Unable to load student resources.</div>';
+  if (pdfResp.error) console.error("Student resources:", pdfResp.error);
+  if (linkResp.error) console.error("Student links:", linkResp.error);
+  const pdfs=pdfResp.data||[], links=linkResp.data||[];
+  if (!pdfs.length && !links.length) {
+    container.innerHTML='<div class="message">No study resources or useful links available.</div>';
     return;
   }
 
-  if (!data || data.length === 0) {
-    container.innerHTML =
-      '<div class="message">No student resources available.</div>';
-    return;
-  }
+  const pdfCards=pdfs.map(r=>`<article class="resource-card"><h3>📚 ${escapeHtml(r.title||"Study Resource")}</h3><div class="resource-meta">${r.class_number ? `Class ${escapeHtml(r.class_number)}` : "All Classes"} • ${escapeHtml(r.medium||"All")} Medium</div><p>${escapeHtml(r.description||"Study material for students.")}</p>${r.file_url?`<a class="resource-btn" href="${escapeHtml(r.file_url)}" target="_blank" rel="noopener noreferrer">📄 Download / Open PDF ↗</a>`:""}</article>`).join("");
+  const linkCards=links.map(r=>`<article class="resource-card video-card"><h3>▶️ ${escapeHtml(r.title||"Study Video / Useful Link")}</h3><p>${escapeHtml(r.description||"")}</p>${r.link_url?`<a class="resource-btn" href="${escapeHtml(r.link_url)}" target="_blank" rel="noopener noreferrer">🔗 Open Video / Link ↗</a>`:""}</article>`).join("");
 
-  container.innerHTML = "";
-
-  data.forEach(row => {
-
-    const title =
-      row.title ||
-      row.resource_title ||
-      "Student Resource";
-
-    const description =
-      row.description ||
-      row.content ||
-      "";
-
-    const url =
-      row.link_url ||
-      row.url ||
-      row.link ||
-      "";
-
-    const card = document.createElement("div");
-    card.className = "info-card";
-
-    card.innerHTML = `
-      <h3>🎓 ${escapeHtml(title)}</h3>
-
-      <p>${escapeHtml(description)}</p>
-
-      ${
-        url
-          ? `<a
-               class="info-link"
-               href="${escapeHtml(url)}"
-               target="_blank"
-               rel="noopener noreferrer">
-               Open Resource ↗
-             </a>`
-          : ""
-      }
-    `;
-
-    container.appendChild(card);
-  });
+  container.innerHTML=`<div class="module-card"><div class="result-head"><div><h3>📚 Study Resources</h3><p class="module-subtitle">Textbooks, notes, worksheets and other PDF materials published by the school.</p></div></div><div class="resource-grid">${pdfCards||'<div class="message no-data">No PDF study resources published yet.</div>'}</div></div><div class="module-card"><div class="result-head"><div><h3>▶️ Study Videos & Useful Links</h3><p class="module-subtitle">YouTube videos, websites and other learning links for students.</p></div></div><div class="resource-grid">${linkCards||'<div class="message no-data">No study videos or useful links published yet.</div>'}</div></div>`;
 }
 
 
 /* =========================
-   LOAD DEPARTMENT LINKS
+    LOAD DEPARTMENT LINKS
    ========================= */
 
 async function loadDepartmentLinks() {
@@ -1226,6 +834,7 @@ loadGallery();
 loadAnnouncements();
 loadAchievements();
 loadResults();
+loadStudentStrength();
 loadStudentCorner();
 loadDepartmentLinks();
 
