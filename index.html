@@ -49,7 +49,7 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 .login{max-width:430px;margin:9vh auto;background:#fff;padding:30px;border-radius:16px;border:1px solid #dce5ed;box-shadow:0 10px 30px #0001}
 .notice{padding:12px;border-radius:9px;background:#fff7df;border:1px solid #ead28b;margin-bottom:16px}
 .msg{padding:11px;border-radius:8px;margin:12px 0;display:none}.ok{display:block;background:#e8f7ed;color:#1d6b3a}.err{display:block;background:#fdecec;color:#9b2727}
- .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.photo{background:#fff;border:1px solid #e1e8ef;border-radius:10px;overflow:hidden}.photo img,.photo video{width:100%;height:180px;object-fit:cover;display:block;background:#111}.photo div{padding:10px;font-size:13px;word-break:break-word}.media-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eaf2fb;color:#0d5ea6;font-size:12px;font-weight:700;margin-bottom:7px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}.photo{background:#fff;border:1px solid #e1e8ef;border-radius:10px;overflow:hidden}.photo img,.photo video{width:100%;height:180px;object-fit:cover;display:block}.photo video{background:#111}.photo div{padding:10px;font-size:13px;word-break:break-word}
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.side{width:190px}.gallery{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.layout{display:block}.side{width:100%;display:flex;overflow:auto;gap:4px}.side button{white-space:nowrap;width:auto}.main{padding:16px}.grid,.cards,.gallery{grid-template-columns:1fr 1fr}}
 </style>
@@ -74,6 +74,7 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <aside class="side">
 <button class="active" onclick="show('dashboard',this)">📊 Dashboard</button>
 <button onclick="show('gallery',this);loadGallery()">📸 Gallery</button>
+<button onclick="show('homepageBackground',this);loadHomepageBackgrounds()">🏠 Homepage Background</button>
 <button onclick="show('settings',this);loadSettings()">⚙️ School Information</button>
 <button onclick="show('staff',this);loadStaff()">👨‍🏫 Staff</button>
 <button onclick="show('studentStrength',this);loadStudentStrength()">👨‍🎓 Student Strength</button>
@@ -93,6 +94,7 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <h1>Welcome, Administrator</h1><p class="muted">Connected to the KPS Harishi Supabase project.</p>
 <div class="grid">
 <div class="stat">📸🎥 Gallery<b id="photoCount">—</b><span class="muted">stored media</span></div>
+<div class="stat">🏠 Homepage<b id="backgroundCount">—</b><span class="muted">background photos</span></div>
 <div class="stat">🏫 School<b>Ready</b><span class="muted">Supabase connection</span></div>
 <div class="stat">🔐 Admin<b>Verified</b><span class="muted">current session</span></div>
 <div class="stat">🌐 Website<b>Ready</b><span class="muted">backend connected</span></div>
@@ -108,6 +110,21 @@ label{font-weight:600;font-size:14px}.hidden{display:none}
 <button class="btn" onclick="uploadPhotos()">⬆️ Upload Photos / Videos</button>
 <div id="galleryMsg" class="msg"></div><div id="galleryGrid" class="gallery"></div>
 </div></section>
+
+<section id="homepageBackground" class="hidden">
+<div class="panel">
+<h2>🏠 Homepage Background Photos</h2>
+<p class="muted">Upload school photos that will appear as the rotating background on the public <strong>school.html</strong> homepage. These photos are separate from the Gallery.</p>
+<div class="notice">📌 <strong>Recommended:</strong> Use clear landscape school photos. JPG/PNG/WEBP, maximum 5 MB per photo. You can upload multiple photos at once.</div>
+<label>Select homepage photos</label>
+<input id="homepageFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+<button class="btn" onclick="uploadHomepageBackgrounds()">⬆️ Upload Homepage Photos</button>
+<div id="homepageMsg" class="msg"></div>
+<hr>
+<h3>🖼️ Current Homepage Photos</h3>
+<div id="homepageBackgroundGrid" class="gallery"></div>
+</div>
+</section>
 
 <section id="settings" class="hidden">
 <div class="panel"><h2>⚙️ School Information</h2>
@@ -543,39 +560,96 @@ Add and manage school achievements.
 <h2>👨‍🎓 Student Corner</h2>
 
 <p class="muted">
-Add useful information and resources for students.
+Manage study materials, textbooks, notes, videos and useful links for students.
+</p>
+
+<h3>📚 Study Resources</h3>
+<p class="muted">Upload PDF textbooks, notes, question papers, worksheets and other study materials.
+</p>
+
+<label>Resource Title</label>
+<input id="studentResourceTitle"
+       placeholder="Example: Class 10 Science Notes">
+
+<label>Class</label>
+<select id="studentResourceClass">
+  <option value="">All Classes</option>
+  <option value="1">Class 1</option>
+  <option value="2">Class 2</option>
+  <option value="3">Class 3</option>
+  <option value="4">Class 4</option>
+  <option value="5">Class 5</option>
+  <option value="6">Class 6</option>
+  <option value="7">Class 7</option>
+  <option value="8">Class 8</option>
+  <option value="9">Class 9</option>
+  <option value="10">Class 10</option>
+  <option value="11">Class 11</option>
+  <option value="12">Class 12</option>
+</select>
+
+<label>Medium</label>
+<select id="studentResourceMedium">
+  <option value="All">All</option>
+  <option value="Kannada">Kannada</option>
+  <option value="English">English</option>
+</select>
+
+<label>Description</label>
+<textarea id="studentResourceDescription"
+          rows="3"
+          placeholder="Briefly describe this study material"></textarea>
+
+<label>PDF File</label>
+<input id="studentResourceFile" type="file" accept="application/pdf,.pdf">
+<p class="muted" style="font-size:12px;margin-top:-7px">PDF only. Maximum 50 MB.</p>
+
+<button class="btn" onclick="uploadStudentResource()">
+➕ Upload Study Resource
+</button>
+
+<div id="studentResourceMsg" class="msg"></div>
+
+<hr>
+
+<h3>📚 Published Study Resources</h3>
+<div id="studentResourceList"></div>
+
+<hr>
+
+<h3>▶️ Study Videos &amp; Useful Links</h3>
+<p class="muted">Add YouTube videos, educational websites and social-media study links. Existing Student Corner links are kept here.
 </p>
 
 <label>Title</label>
 <input id="studentTitle"
-       placeholder="Example: Scholarship Information">
+       placeholder="Example: Class 10 Maths Video Lesson">
 
 <label>Description</label>
 <textarea id="studentDescription"
-          rows="4"
-          placeholder="Enter information for students"></textarea>
+          rows="3"
+          placeholder="Describe the video or useful link"></textarea>
 
-<label>Link URL (optional)</label>
+<label>YouTube / Website / Social Media URL</label>
 <input id="studentLink"
-       placeholder="https://example.com">
+       placeholder="https://www.youtube.com/...">
 
 <button class="btn" onclick="addStudentCorner()">
-➕ Add Student Resource
+➕ Add Video / Useful Link
 </button>
 
 <div id="studentMsg" class="msg"></div>
 
 <hr>
 
-<h3>Student Resources</h3>
-
+<h3>▶️ Published Videos &amp; Useful Links</h3>
 <div id="studentList"></div>
 
 </div>
 
 </section>
 
- <section id="departmentLinks" class="hidden">
+<section id="departmentLinks" class="hidden">
 
 <div class="panel">
 
@@ -625,6 +699,8 @@ const SUPABASE_KEY = "sb_publishable_3po9-Cmv3cJGJYh8PWyprQ_SCB9sXi6";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const BUCKET = "school-gallery";
 const STAFF_BUCKET = "staff-photos";
+const STUDENT_RESOURCES_BUCKET = "student-resources";
+const HOMEPAGE_BACKGROUND_BUCKET = "homepage-backgrounds";
 
 function msg(id,text,ok=false) {
  const e=document.getElementById(id); e.textContent=text; e.className="msg "+(ok?"ok":"err");
@@ -650,6 +726,7 @@ async function login() {
  document.getElementById("appView").classList.remove("hidden");
  document.getElementById("status").textContent="Connected and authenticated as "+user.user.email;
  loadGallery();
+ loadHomepageBackgrounds();
 }
 
 async function logout() {
@@ -657,13 +734,6 @@ async function logout() {
  document.getElementById("appView").classList.add("hidden");
  document.getElementById("loginView").classList.remove("hidden");
  document.getElementById("password").value="";
-}
-
-function isGalleryVideo(fileOrName, mimeType) {
- const type=(mimeType || (fileOrName && fileOrName.type) || "").toLowerCase();
- if(type.startsWith("video/")) return true;
- const name=typeof fileOrName === "string" ? fileOrName : (fileOrName?.name || "");
- return /\.(mp4|webm|ogg|mov)$/i.test(name);
 }
 
 async function loadGallery() {
@@ -674,57 +744,122 @@ async function loadGallery() {
  for(const f of data) {
    if(!f.name || f.name.startsWith(".")) continue;
    const {data:url}=sb.storage.from(BUCKET).getPublicUrl(f.name);
-   const isVideo=isGalleryVideo(f.name, f.metadata?.mimetype || f.metadata?.contentType || "");
-   const preview=isVideo
-     ? `<video src="${url.publicUrl}" controls preload="metadata" playsinline></video>`
-     : `<img src="${url.publicUrl}" alt="School gallery photo" loading="lazy">`;
-   const kind=isVideo ? "🎥 Video" : "📷 Photo";
    const card=document.createElement("div"); card.className="photo";
-   card.innerHTML=`${preview}<div><span class="media-badge">${kind}</span><br><strong>${escapeHtml(f.name)}</strong><br><button class="btn danger" style="margin-top:8px" onclick="deletePhoto('${encodeURIComponent(f.name)}')">Delete</button></div>`;
+   card.innerHTML=`<img src="${url.publicUrl}" alt=""><div><strong>${escapeHtml(f.name)}</strong><br><button class="btn danger" style="margin-top:8px" onclick="deletePhoto('${encodeURIComponent(f.name)}')">Delete</button></div>`;
    grid.appendChild(card);
  }
 }
-
 async function uploadPhotos() {
  const files=[...document.getElementById("files").files];
- if(!files.length) {msg("galleryMsg","Please select at least one photo or video.");return;}
-
- const maxVideoSize=100*1024*1024;
- const allowedVideoTypes=["video/mp4","video/webm","video/ogg","video/quicktime"];
-
- for(const file of files) {
-   const isVideo=file.type.startsWith("video/");
-   if(!file.type.startsWith("image/") && !allowedVideoTypes.includes(file.type)) {
-     msg("galleryMsg",`Unsupported file type: ${file.name}`);
-     return;
-   }
-   if(isVideo && file.size>maxVideoSize) {
-     msg("galleryMsg",`Video is too large: ${file.name}. Maximum size is 100 MB.`);
-     return;
-   }
- }
-
- msg("galleryMsg","Uploading...",true);
+ if(!files.length) {msg("galleryMsg","Please select at least one image.");return;}
  for(const file of files) {
    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"-");
    const path=Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+safe;
    const r=await sb.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type});
    if(r.error) {msg("galleryMsg",r.error.message);return;}
  }
- msg("galleryMsg","Photos / videos uploaded successfully.",true);
+ msg("galleryMsg","Photos uploaded successfully.",true);
  document.getElementById("files").value="";
  loadGallery();
 }
-
 async function deletePhoto(encoded) {
  const name=decodeURIComponent(encoded);
- if(!confirm("Delete this gallery item?")) return;
+ if(!confirm("Delete this photo?")) return;
  const r=await sb.storage.from(BUCKET).remove([name]);
  if(r.error) {msg("galleryMsg",r.error.message);return;}
- msg("galleryMsg","Gallery item deleted.",true); loadGallery();
+ msg("galleryMsg","Photo deleted.",true); loadGallery();
 }
 
 const keys=["school_name","vision","mission","phone_1","phone_2","email","address","google_maps"];
+
+/* =========================================================
+   HOMEPAGE BACKGROUND PHOTOS
+   Separate public bucket for the school.html homepage slider.
+   ========================================================= */
+async function loadHomepageBackgrounds() {
+  const grid = document.getElementById("homepageBackgroundGrid");
+  if (!grid) return;
+  grid.innerHTML = '<div class="card">Loading homepage photos...</div>';
+
+  const { data, error } = await sb.storage
+    .from(HOMEPAGE_BACKGROUND_BUCKET)
+    .list("", { limit: 100, sortBy: { column: "created_at", order: "asc" } });
+
+  if (error) {
+    grid.innerHTML = '<div class="card">' + escapeHtml(error.message) + '</div>';
+    return;
+  }
+
+  const files = (data || []).filter(f => f.name && !f.name.startsWith("."));
+  document.getElementById("backgroundCount").textContent = files.length;
+
+  if (!files.length) {
+    grid.innerHTML = '<div class="card">No homepage photos uploaded yet.</div>';
+    return;
+  }
+
+  grid.innerHTML = "";
+  files.forEach(file => {
+    const { data: urlData } = sb.storage.from(HOMEPAGE_BACKGROUND_BUCKET).getPublicUrl(file.name);
+    const card = document.createElement("div");
+    card.className = "photo";
+    card.innerHTML = `
+      <img src="${escapeHtml(urlData.publicUrl)}" alt="Homepage background">
+      <div>
+        <strong>${escapeHtml(file.name)}</strong><br>
+        <button class="btn danger" style="margin-top:8px" onclick="deleteHomepageBackground('${encodeURIComponent(file.name)}')">🗑️ Delete</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+async function uploadHomepageBackgrounds() {
+  const input = document.getElementById("homepageFiles");
+  const files = [...(input.files || [])];
+  if (!files.length) {
+    msg("homepageMsg", "Please select at least one photo.");
+    return;
+  }
+
+  for (const file of files) {
+    if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+      msg("homepageMsg", `Unsupported file: ${file.name}. Use JPG, PNG or WEBP.`);
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      msg("homepageMsg", `${file.name} is larger than 5 MB.`);
+      return;
+    }
+
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const path = Date.now() + "-" + Math.random().toString(36).slice(2) + "-" + safe;
+    const { error } = await sb.storage.from(HOMEPAGE_BACKGROUND_BUCKET).upload(path, file, {
+      upsert: false,
+      contentType: file.type
+    });
+    if (error) {
+      msg("homepageMsg", error.message);
+      return;
+    }
+  }
+
+  msg("homepageMsg", "Homepage photos uploaded successfully.", true);
+  input.value = "";
+  loadHomepageBackgrounds();
+}
+
+async function deleteHomepageBackground(encoded) {
+  const name = decodeURIComponent(encoded);
+  if (!confirm("Delete this homepage background photo?")) return;
+  const { error } = await sb.storage.from(HOMEPAGE_BACKGROUND_BUCKET).remove([name]);
+  if (error) {
+    msg("homepageMsg", error.message);
+    return;
+  }
+  msg("homepageMsg", "Homepage photo deleted successfully.", true);
+  loadHomepageBackgrounds();
+}
+
 async function loadSettings() {
  const {data,error}=await sb.from("site_settings").select("setting_key,setting_value").in("setting_key",keys);
  if(error) {msg("settingsMsg",error.message);return;}
@@ -2765,11 +2900,79 @@ function escapeHtml(value) {
 }
 
  
-window.loadStudentCorner = async function() {
+async function loadStudentResources() {
 
-  const list =
-    document.getElementById("studentList");
+  const list = document.getElementById("studentResourceList");
+  list.innerHTML = "";
 
+  const { data, error } = await sb
+    .from("student_resources")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    msg("studentResourceMsg", "Failed to load study resources: " + error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p class="muted">No study resources available.</p>';
+    return;
+  }
+
+  data.forEach(row => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    const classText = row.class_number ? "Class " + row.class_number : "All Classes";
+    const mediumText = row.medium || "All";
+
+    div.innerHTML = `
+      <h3>📄 ${escapeHtml(row.title)}</h3>
+      <p class="muted">${escapeHtml(classText)} • ${escapeHtml(mediumText)} Medium</p>
+      <p>${escapeHtml(row.description || "")}</p>
+
+      <p>
+        <a href="${escapeHtml(row.file_url)}" target="_blank" rel="noopener">
+          ⬇️ Download / Open PDF
+        </a>
+      </p>
+
+      <button class="btn"
+        onclick="editStudentResource(
+          ${row.id},
+          '${encodeURIComponent(row.title)}',
+          '${encodeURIComponent(row.description || "")}',
+          '${row.class_number ?? ""}',
+          '${encodeURIComponent(row.medium || "All")}'
+        )">
+        ✏️ Edit Details
+      </button>
+
+      <button class="btn secondary"
+        onclick="replaceStudentResourceFile(${row.id}, '${encodeURIComponent(row.file_path)}')">
+        🔄 Replace PDF
+      </button>
+
+      <button class="btn danger"
+        onclick="deleteStudentResource(${row.id}, '${encodeURIComponent(row.title)}', '${encodeURIComponent(row.file_path)}')">
+        🗑️ Delete
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+
+async function loadStudentCorner() {
+  await Promise.all([loadStudentResources(), loadStudentCornerLinks()]);
+}
+
+
+async function loadStudentCornerLinks() {
+
+  const list = document.getElementById("studentList");
   list.innerHTML = "";
 
   const { data, error } = await sb
@@ -2778,21 +2981,18 @@ window.loadStudentCorner = async function() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    msg("studentMsg", error.message);
+    msg("studentMsg", "Failed to load videos/links: " + error.message);
     return;
   }
 
   if (!data || data.length === 0) {
-    list.innerHTML =
-      '<p class="muted">No student resources available.</p>';
+    list.innerHTML = '<p class="muted">No videos or useful links available.</p>';
     return;
   }
 
   data.forEach(row => {
 
-    const div =
-      document.createElement("div");
-
+    const div = document.createElement("div");
     div.className = "card";
 
     const link = row.link_url
@@ -2801,19 +3001,15 @@ window.loadStudentCorner = async function() {
           <a href="${escapeHtml(row.link_url)}"
              target="_blank"
              rel="noopener">
-             🔗 Open Resource
+             ▶️ Open Video / Link
           </a>
         </p>
       `
       : "";
 
     div.innerHTML = `
-      <h3>👨‍🎓 ${escapeHtml(row.title)}</h3>
-
-      <p>
-        ${escapeHtml(row.description || "")}
-      </p>
-
+      <h3>🔗 ${escapeHtml(row.title)}</h3>
+      <p>${escapeHtml(row.description || "")}</p>
       ${link}
 
       <button class="btn"
@@ -2837,28 +3033,265 @@ window.loadStudentCorner = async function() {
 
     list.appendChild(div);
   });
+}
+
+
+window.uploadStudentResource = async function() {
+
+  const title = document.getElementById("studentResourceTitle").value.trim();
+  const description = document.getElementById("studentResourceDescription").value.trim();
+  const classValue = document.getElementById("studentResourceClass").value;
+  const medium = document.getElementById("studentResourceMedium").value;
+  const file = document.getElementById("studentResourceFile").files?.[0];
+
+  if (!title) {
+    msg("studentResourceMsg", "Please enter a resource title.");
+    return;
+  }
+
+  if (!file) {
+    msg("studentResourceMsg", "Please select a PDF file.");
+    return;
+  }
+
+  if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+    msg("studentResourceMsg", "Only PDF files are allowed.");
+    return;
+  }
+
+  if (file.size > 50 * 1024 * 1024) {
+    msg("studentResourceMsg", "The PDF must be 50 MB or smaller.");
+    return;
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const filePath =
+    "resources/" + Date.now() + "-" + Math.random().toString(36).slice(2) + "-" + safeName;
+
+  msg("studentResourceMsg", "Uploading PDF...");
+
+  const { error: uploadError } = await sb.storage
+    .from(STUDENT_RESOURCES_BUCKET)
+    .upload(filePath, file, {
+      upsert: false,
+      contentType: "application/pdf"
+    });
+
+  if (uploadError) {
+    msg("studentResourceMsg", "PDF upload failed: " + uploadError.message);
+    return;
+  }
+
+  const { data: publicData } = sb.storage
+    .from(STUDENT_RESOURCES_BUCKET)
+    .getPublicUrl(filePath);
+
+  const fileUrl = publicData?.publicUrl || "";
+
+  const { error: dbError } = await sb
+    .from("student_resources")
+    .insert({
+      title: title,
+      description: description,
+      class_number: classValue ? Number(classValue) : null,
+      medium: medium || "All",
+      file_name: file.name,
+      file_path: filePath,
+      file_url: fileUrl
+    });
+
+  if (dbError) {
+    await sb.storage.from(STUDENT_RESOURCES_BUCKET).remove([filePath]);
+    msg("studentResourceMsg", "Resource database save failed: " + dbError.message);
+    return;
+  }
+
+  msg("studentResourceMsg", "Study resource uploaded successfully.", true);
+
+  document.getElementById("studentResourceTitle").value = "";
+  document.getElementById("studentResourceDescription").value = "";
+  document.getElementById("studentResourceClass").value = "";
+  document.getElementById("studentResourceMedium").value = "All";
+  document.getElementById("studentResourceFile").value = "";
+
+  loadStudentResources();
+};
+
+
+window.editStudentResource = async function(id, encodedTitle, encodedDescription, classNumber, encodedMedium) {
+
+  const newTitle = prompt("Resource title:", decodeURIComponent(encodedTitle));
+  if (!newTitle || !newTitle.trim()) return;
+
+  const newDescription = prompt("Description:", decodeURIComponent(encodedDescription));
+  if (newDescription === null) return;
+
+  const currentClass = classNumber || "";
+  const newClass = prompt("Class number (1-12), or leave blank for All Classes:", currentClass);
+  if (newClass === null) return;
+
+  let classValue = newClass.trim() ? Number(newClass.trim()) : null;
+  if (classValue !== null && (!Number.isInteger(classValue) || classValue < 1 || classValue > 12)) {
+    msg("studentResourceMsg", "Class must be between 1 and 12, or left blank.");
+    return;
+  }
+
+  const newMedium = prompt("Medium (Kannada, English or All):", decodeURIComponent(encodedMedium));
+  if (newMedium === null) return;
+
+  const mediumValue = newMedium.trim() || "All";
+  if (!["Kannada", "English", "All"].includes(mediumValue)) {
+    msg("studentResourceMsg", "Medium must be Kannada, English or All.");
+    return;
+  }
+
+  const { error } = await sb
+    .from("student_resources")
+    .update({
+      title: newTitle.trim(),
+      description: newDescription.trim(),
+      class_number: classValue,
+      medium: mediumValue
+    })
+    .eq("id", id);
+
+  if (error) {
+    msg("studentResourceMsg", "Update failed: " + error.message);
+    return;
+  }
+
+  msg("studentResourceMsg", "Study resource details updated successfully.", true);
+  loadStudentResources();
+};
+
+
+window.replaceStudentResourceFile = async function(id, encodedPath) {
+
+  const oldPath = decodeURIComponent(encodedPath);
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/pdf,.pdf";
+  input.style.position = "fixed";
+  input.style.left = "-9999px";
+  document.body.appendChild(input);
+
+  input.onchange = async function() {
+    const file = input.files?.[0];
+    input.remove();
+
+    if (!file) return;
+
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      msg("studentResourceMsg", "Only PDF files are allowed.");
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      msg("studentResourceMsg", "The PDF must be 50 MB or smaller.");
+      return;
+    }
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+    const newPath =
+      "resources/" + Date.now() + "-" + Math.random().toString(36).slice(2) + "-" + safeName;
+
+    msg("studentResourceMsg", "Replacing PDF...");
+
+    const { error: uploadError } = await sb.storage
+      .from(STUDENT_RESOURCES_BUCKET)
+      .upload(newPath, file, {
+        upsert: false,
+        contentType: "application/pdf"
+      });
+
+    if (uploadError) {
+      msg("studentResourceMsg", "New PDF upload failed: " + uploadError.message);
+      return;
+    }
+
+    const { data: publicData } = sb.storage
+      .from(STUDENT_RESOURCES_BUCKET)
+      .getPublicUrl(newPath);
+
+    const newUrl = publicData?.publicUrl || "";
+
+    const { error: updateError } = await sb
+      .from("student_resources")
+      .update({
+        file_name: file.name,
+        file_path: newPath,
+        file_url: newUrl
+      })
+      .eq("id", id);
+
+    if (updateError) {
+      await sb.storage.from(STUDENT_RESOURCES_BUCKET).remove([newPath]);
+      msg("studentResourceMsg", "Database update failed: " + updateError.message);
+      return;
+    }
+
+    const { error: oldDeleteError } = await sb.storage
+      .from(STUDENT_RESOURCES_BUCKET)
+      .remove([oldPath]);
+
+    if (oldDeleteError) {
+      console.log("Old PDF deletion warning:", oldDeleteError.message);
+    }
+
+    msg("studentResourceMsg", "PDF replaced successfully.", true);
+    loadStudentResources();
+  };
+
+  input.click();
+};
+
+
+window.deleteStudentResource = async function(id, encodedTitle, encodedPath) {
+
+  const title = decodeURIComponent(encodedTitle);
+  const filePath = decodeURIComponent(encodedPath);
+
+  if (!confirm(`Delete "${title}" from Study Resources?`)) return;
+
+  const { error: dbError } = await sb
+    .from("student_resources")
+    .delete()
+    .eq("id", id);
+
+  if (dbError) {
+    msg("studentResourceMsg", "Delete failed: " + dbError.message);
+    return;
+  }
+
+  const { error: storageError } = await sb.storage
+    .from(STUDENT_RESOURCES_BUCKET)
+    .remove([filePath]);
+
+  if (storageError) {
+    msg("studentResourceMsg", "Resource record deleted, but file deletion failed: " + storageError.message);
+    loadStudentResources();
+    return;
+  }
+
+  msg("studentResourceMsg", "Study resource deleted successfully.", true);
+  loadStudentResources();
 };
 
 
 window.addStudentCorner = async function() {
 
-  const title =
-    document.getElementById("studentTitle")
-      .value.trim();
-
-  const description =
-    document.getElementById("studentDescription")
-      .value.trim();
-
-  const link =
-    document.getElementById("studentLink")
-      .value.trim();
+  const title = document.getElementById("studentTitle").value.trim();
+  const description = document.getElementById("studentDescription").value.trim();
+  const link = document.getElementById("studentLink").value.trim();
 
   if (!title) {
-    msg(
-      "studentMsg",
-      "Please enter a title."
-    );
+    msg("studentMsg", "Please enter a title.");
+    return;
+  }
+
+  if (!link) {
+    msg("studentMsg", "Please enter a YouTube, website or social-media URL.");
     return;
   }
 
@@ -2867,7 +3300,7 @@ window.addStudentCorner = async function() {
     .insert({
       title: title,
       description: description,
-      link_url: link || null
+      link_url: link
     });
 
   if (error) {
@@ -2875,57 +3308,38 @@ window.addStudentCorner = async function() {
     return;
   }
 
-  msg(
-    "studentMsg",
-    "Student resource added successfully.",
-    true
-  );
+  msg("studentMsg", "Video / useful link added successfully.", true);
 
   document.getElementById("studentTitle").value = "";
   document.getElementById("studentDescription").value = "";
   document.getElementById("studentLink").value = "";
 
-  loadStudentCorner();
+  loadStudentCornerLinks();
 };
 
 
-window.editStudentCorner = async function(
-  id,
-  title,
-  description,
-  link
-) {
+window.editStudentCorner = async function(id, title, description, link) {
 
-  const newTitle =
-    prompt(
-      "Title:",
-      decodeURIComponent(title)
-    );
-
+  const newTitle = prompt("Title:", decodeURIComponent(title));
   if (!newTitle || !newTitle.trim()) return;
 
-  const newDescription =
-    prompt(
-      "Description:",
-      decodeURIComponent(description)
-    );
-
+  const newDescription = prompt("Description:", decodeURIComponent(description));
   if (newDescription === null) return;
 
-  const newLink =
-    prompt(
-      "Link URL:",
-      decodeURIComponent(link)
-    );
-
+  const newLink = prompt("YouTube / Website / Social Media URL:", decodeURIComponent(link));
   if (newLink === null) return;
+
+  if (!newLink.trim()) {
+    msg("studentMsg", "A URL is required for a video/useful link.");
+    return;
+  }
 
   const { error } = await sb
     .from("student_corner")
     .update({
       title: newTitle.trim(),
       description: newDescription.trim(),
-      link_url: newLink.trim() || null
+      link_url: newLink.trim()
     })
     .eq("id", id);
 
@@ -2934,29 +3348,16 @@ window.editStudentCorner = async function(
     return;
   }
 
-  msg(
-    "studentMsg",
-    "Student resource updated successfully.",
-    true
-  );
-
-  loadStudentCorner();
+  msg("studentMsg", "Video / useful link updated successfully.", true);
+  loadStudentCornerLinks();
 };
 
 
-window.deleteStudentCorner = async function(
-  id,
-  encodedTitle
-) {
+window.deleteStudentCorner = async function(id, encodedTitle) {
 
-  const title =
-    decodeURIComponent(encodedTitle);
+  const title = decodeURIComponent(encodedTitle);
 
-  if (!confirm(
-    `Delete "${title}" from Student Corner?`
-  )) {
-    return;
-  }
+  if (!confirm(`Delete "${title}" from Student Corner?`)) return;
 
   const { error } = await sb
     .from("student_corner")
@@ -2968,14 +3369,10 @@ window.deleteStudentCorner = async function(
     return;
   }
 
-  msg(
-    "studentMsg",
-    "Student resource deleted successfully.",
-    true
-  );
-
-  loadStudentCorner();
+  msg("studentMsg", "Video / useful link deleted successfully.", true);
+  loadStudentCornerLinks();
 };
+
 window.loadDepartmentLinks = async function() {
 
   const list =
