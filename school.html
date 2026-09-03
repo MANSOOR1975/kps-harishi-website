@@ -228,8 +228,8 @@ footer p{margin:7px 0}
   <div class="home-hero-content">
     <div>
       <span class="hero-kicker">🏫 Karnataka Public School, Harishi</span>
-      <h2>Welcome to KPS Harishi</h2>
-      <p>Nurturing minds, inspiring excellence and building a better tomorrow.</p>
+      <h2 id="welcomeHeading">Welcome to KPS Harishi</h2>
+      <p id="welcomeMessage">Nurturing minds, inspiring excellence and building a better tomorrow.</p>
     </div>
   </div>
   <button class="hero-arrow hero-prev" type="button" aria-label="Previous photo" onclick="changeHeroSlide(-1)">‹</button>
@@ -240,9 +240,9 @@ footer p{margin:7px 0}
   <h2 class="section-title">About Our School</h2>
 
   <div class="about">
-    <h3>Welcome to KPS Harishi</h3>
+    <h3 id="aboutWelcomeHeading">Welcome to KPS Harishi</h3>
 
-    <p>
+    <p id="aboutWelcomeMessage">
       Karnataka Public School, Harishi is committed to providing
       quality education and creating a positive learning environment
       for every student.
@@ -361,6 +361,26 @@ const sb = window.supabase.createClient(
 
 const BUCKET = "school-gallery";
 const HOMEPAGE_BACKGROUND_BUCKET = "homepage-backgrounds";
+
+async function loadWelcomeMessage() {
+  try {
+    const { data, error } = await sb.from("site_settings")
+      .select("setting_key,setting_value")
+      .in("setting_key", ["welcome_heading","welcome_message"]);
+    if (error) throw error;
+    const settings = {};
+    (data || []).forEach(row => settings[row.setting_key] = row.setting_value || "");
+    const heading = settings.welcome_heading || "Welcome to KPS Harishi";
+    const message = settings.welcome_message || "Nurturing minds, inspiring excellence and building a better tomorrow.";
+    document.getElementById("welcomeHeading").textContent = heading;
+    document.getElementById("welcomeMessage").textContent = message;
+    document.getElementById("aboutWelcomeHeading").textContent = heading;
+    document.getElementById("aboutWelcomeMessage").textContent = message;
+  } catch (e) {
+    console.warn("Welcome message could not be loaded:", e.message);
+  }
+}
+
 let heroIndex = 0;
 let heroTimer = null;
 
@@ -957,7 +977,8 @@ function escapeHtml(value) {
    START
 ========================= */
 
-loadHomepageBackgrounds();
+loadWelcomeMessage();
+  loadHomepageBackgrounds();
 loadStaff();
 loadGallery();
 loadAnnouncements();
