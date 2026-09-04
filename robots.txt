@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mansoor1975.github.io/kps-harishi-website/sitemap.xml
