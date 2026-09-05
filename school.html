@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Karnataka Public School Harishi | KPS Harishi</title>
+<!-- KPS Harishi public website: homepage/gallery/achievement fixes -->
 <meta name="description" content="Official website of Karnataka Public School, Harishi (KPS Harishi). View school announcements, achievements, examination results, student strength, student resources, staff and school gallery.">
 <meta name="keywords" content="KPS Harishi, Karnataka Public School Harishi, Karnataka Public School, KPS Harishi school, Harishi school, government school Harishi, KPS Karnataka, school results Harishi">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="author" content="Karnataka Public School, Harishi">
-<link rel="canonical" href="https://mansoor1975.github.io/kps-harishi-website/">
+<link rel="canonical" href="https://mansoor1975.github.io/kps-harishi-website/school.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Karnataka Public School Harishi | KPS Harishi">
 <meta property="og:description" content="Official website of Karnataka Public School, Harishi. Announcements, achievements, results, student strength, resources, staff and school gallery.">
-<meta property="og:url" content="https://mansoor1975.github.io/kps-harishi-website/">
+<meta property="og:url" content="https://mansoor1975.github.io/kps-harishi-website/school.html">
 <meta property="og:site_name" content="Karnataka Public School, Harishi">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Karnataka Public School Harishi | KPS Harishi">
@@ -25,7 +26,7 @@
   "@type": "School",
   "name": "Karnataka Public School, Harishi",
   "alternateName": "KPS Harishi",
-  "url": "https://mansoor1975.github.io/kps-harishi-website/",
+  "url": "https://mansoor1975.github.io/kps-harishi-website/school.html",
   "description": "Official website of Karnataka Public School, Harishi, with school announcements, achievements, examination results, student resources, staff information and gallery.",
   "address": {
     "@type": "PostalAddress",
@@ -228,6 +229,47 @@ footer p{margin:7px 0}
 .percent{font-weight:800;color:var(--green)}.topper-name{font-weight:700}
 @media(max-width:600px){.home-hero,.home-hero-content{min-height:360px}.home-hero-content{padding:35px 28px}.hero-arrow{width:38px;height:38px;font-size:22px}.result-head{display:block}.year-badge{display:inline-block;margin-top:12px}.module-card{padding:16px}}
 
+
+/* Homepage: clean photo-first design */
+.home-hero-content{display:none}
+.home-hero-slide:after{display:none}
+.home-hero{min-height:450px;margin-bottom:26px}
+.home-hero-slides{background:#0b2944}
+.hero-arrow{box-shadow:0 4px 14px rgba(0,0,0,.22)}
+@media(max-width:600px){
+  .home-hero,.home-hero-content{min-height:330px}
+  .home-hero{margin-bottom:22px}
+}
+
+/* Gallery cards open media in a separate viewer */
+.gallery-card{cursor:pointer;outline:none}
+.gallery-card:focus-visible{box-shadow:0 0 0 4px rgba(23,105,170,.25),var(--shadow)}
+.gallery-preview{pointer-events:none}
+.gallery-open-hint{float:right;font-weight:700;color:var(--blue)}
+.lightbox{
+  display:none;position:fixed;inset:0;z-index:2147483646;
+  align-items:center;justify-content:center;
+  padding:30px;background:rgba(0,0,0,.88);
+}
+.lightbox-content{
+  width:min(94vw,1100px);height:min(88vh,760px);
+  display:flex;align-items:center;justify-content:center;
+}
+.lightbox-content img,.lightbox-content video{
+  max-width:100%;max-height:100%;width:auto;height:auto;
+  object-fit:contain;border-radius:12px;
+  box-shadow:0 12px 40px rgba(0,0,0,.45);
+}
+.lightbox-content video{width:min(94vw,1100px);max-height:82vh;background:#000}
+.lightbox-close{
+  position:fixed;top:18px;right:22px;z-index:2147483647;
+  width:52px;height:52px;border:0;border-radius:50%;
+  background:#fff;color:#111;font-size:38px;line-height:48px;
+  cursor:pointer;box-shadow:0 5px 20px rgba(0,0,0,.35)
+}
+.lightbox-close:hover{background:#eaf3fb}
+body.gallery-viewer-open{overflow:hidden}
+
 </style>
 
     <meta name="google-site-verification" content="RbeLVJYxBs1ZLh8S5-pKLnDuijlfHWYMMG_H7L233ro" />
@@ -256,13 +298,6 @@ footer p{margin:7px 0}
 <section id="home">
   <div class="home-hero" id="homeHero" aria-label="KPS Harishi school photos">
   <div class="home-hero-slides" id="homeHeroSlides"></div>
-  <div class="home-hero-content">
-    <div>
-      <span class="hero-kicker">🏫 Karnataka Public School, Harishi</span>
-      <h2 id="welcomeHeading">Welcome to KPS Harishi</h2>
-      <p id="welcomeMessage">Nurturing minds, inspiring excellence and building a better tomorrow.</p>
-    </div>
-  </div>
   <button class="hero-arrow hero-prev" type="button" aria-label="Previous photo" onclick="changeHeroSlide(-1)">‹</button>
   <button class="hero-arrow hero-next" type="button" aria-label="Next photo" onclick="changeHeroSlide(1)">›</button>
   <div class="hero-dots" id="heroDots"></div>
@@ -286,19 +321,19 @@ footer p{margin:7px 0}
   </div>
 </section>
 
+<section id="announcements">
+  <h2 class="section-title">📢 Announcements</h2>
+  <div id="announcementList">
+    <div class="message">Loading announcements...</div>
+  </div>
+</section>
+
 <section aria-label="Quick access">
   <div class="info-grid">
     <div class="info-card" style="border-top:5px solid #f4b400"><h3>📊 Results</h3><p>View examination results and achievements.</p><a class="info-link" href="#results">View Results</a></div>
     <div class="info-card" style="border-top:5px solid #16835b"><h3>👨‍🎓 Student Strength</h3><p>See class-wise student strength.</p><a class="info-link" href="#student-strength">View Strength</a></div>
     <div class="info-card" style="border-top:5px solid #7357c9"><h3>📚 Student Corner</h3><p>Study resources and useful learning links.</p><a class="info-link" href="#student-corner">Explore</a></div>
     <div class="info-card" style="border-top:5px solid #d64545"><h3>📷 Gallery</h3><p>Photos and videos from KPS Harishi.</p><a class="info-link" href="#gallery">View Gallery</a></div>
-  </div>
-</section>
-
-<section id="announcements">
-  <h2 class="section-title">📢 Announcements</h2>
-  <div id="announcementList">
-    <div class="message">Loading announcements...</div>
   </div>
 </section>
 
@@ -362,10 +397,13 @@ footer p{margin:7px 0}
 
 </section>
 
-<!-- Gallery Lightbox -->
-<div id="lightbox" class="lightbox">
-    <span class="close">&times;</span>
-    <img id="lightboxImg" src="" alt="School Gallery">
+<!-- Gallery Media Lightbox -->
+<div id="lightbox" class="lightbox" aria-hidden="true">
+  <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Close gallery viewer">&times;</button>
+  <div class="lightbox-content" role="dialog" aria-modal="true" aria-label="School gallery viewer">
+    <img id="lightboxImg" src="" alt="KPS Harishi School Gallery">
+    <video id="lightboxVideo" controls playsinline preload="metadata"></video>
+  </div>
 </div>
 
 </section>
@@ -387,7 +425,20 @@ const SUPABASE_KEY =
 
 const sb = window.supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_KEY,
+    {
+      global: {
+        fetch: (input, init = {}) => {
+          const headers = new Headers(init.headers || {});
+          headers.set("Cache-Control", "no-cache");
+          return fetch(input, {
+            ...init,
+            cache: "no-store",
+            headers
+          });
+        }
+      }
+    }
 );
 
 const BUCKET = "school-gallery";
@@ -403,10 +454,10 @@ async function loadWelcomeMessage() {
     (data || []).forEach(row => settings[row.setting_key] = row.setting_value || "");
     const heading = settings.welcome_heading || "Welcome to KPS Harishi";
     const message = settings.welcome_message || "Nurturing minds, inspiring excellence and building a better tomorrow.";
-    document.getElementById("welcomeHeading").textContent = heading;
-    document.getElementById("welcomeMessage").textContent = message;
-    document.getElementById("aboutWelcomeHeading").textContent = heading;
-    document.getElementById("aboutWelcomeMessage").textContent = message;
+    const aboutHeading = document.getElementById("aboutWelcomeHeading");
+    const aboutMessage = document.getElementById("aboutWelcomeMessage");
+    if (aboutHeading) aboutHeading.textContent = heading;
+    if (aboutMessage) aboutMessage.textContent = message;
   } catch (e) {
     console.warn("Welcome message could not be loaded:", e.message);
   }
@@ -676,17 +727,23 @@ async function loadGallery() {
     const card = document.createElement("div");
     card.className = "gallery-card";
 
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", isVideo ? "Open school video" : "Open school photo");
+
     if (isVideo) {
       const video = document.createElement("video");
-      video.className = "gallery-video";
-      video.controls = true;
+      video.className = "gallery-video gallery-preview";
       video.preload = "metadata";
+      video.muted = true;
       video.playsInline = true;
       video.src = publicData.publicUrl;
+      video.setAttribute("aria-hidden", "true");
       card.appendChild(video);
+
       const label = document.createElement("div");
       label.className = "gallery-label";
-      label.textContent = "🎬 School Video";
+      label.innerHTML = "🎬 School Video <span class='gallery-open-hint'>Click to open</span>";
       card.appendChild(label);
     } else {
       const img = document.createElement("img");
@@ -694,11 +751,22 @@ async function loadGallery() {
       img.alt = "KPS Harishi School Gallery";
       img.loading = "lazy";
       card.appendChild(img);
+
       const label = document.createElement("div");
       label.className = "gallery-label";
-      label.textContent = "📷 School Photo";
+      label.innerHTML = "📷 School Photo <span class='gallery-open-hint'>Click to view</span>";
       card.appendChild(label);
     }
+
+    const openMedia = () => openGalleryMedia(publicData.publicUrl, isVideo);
+    card.addEventListener("click", openMedia);
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openMedia();
+      }
+    });
+
     container.appendChild(card);
   });
 }
@@ -1019,59 +1087,62 @@ loadStudentStrength();
 loadStudentCorner();
 loadDepartmentLinks();
 
-// Gallery Lightbox
+// Gallery Media Lightbox
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
+const lightboxVideo = document.getElementById("lightboxVideo");
+const lightboxClose = document.getElementById("lightboxClose");
 
-// Create a new close button
-const closeBtn = document.createElement("button");
-closeBtn.innerHTML = "&times;";
-closeBtn.setAttribute("aria-label", "Close");
+function openGalleryMedia(url, isVideo) {
+  if (!lightbox) return;
 
-closeBtn.style.cssText = `
-    position: fixed !important;
-    top: 20px !important;
-    right: 25px !important;
-    width: 55px !important;
-    height: 55px !important;
-    border: none !important;
-    border-radius: 50% !important;
-    background: #000 !important;
-    color: #fff !important;
-    font-size: 42px !important;
-    line-height: 50px !important;
-    text-align: center !important;
-    cursor: pointer !important;
-    z-index: 2147483647 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-`;
+  lightbox.style.display = "flex";
+  lightbox.setAttribute("aria-hidden", "false");
+  document.body.classList.add("gallery-viewer-open");
 
-lightbox.appendChild(closeBtn);
+  lightboxImg.style.display = isVideo ? "none" : "block";
+  lightboxVideo.style.display = isVideo ? "block" : "none";
 
-// Open lightbox
-document.addEventListener("click", function(e) {
-    if (e.target.matches(".gallery img")) {
-        lightboxImg.src = e.target.src;
-        lightbox.style.display = "flex";
-    }
+  lightboxVideo.pause();
+  lightboxVideo.removeAttribute("src");
+  lightboxVideo.load();
+
+  if (isVideo) {
+    lightboxVideo.src = url;
+    lightboxVideo.load();
+    lightboxVideo.play().catch(() => {});
+  } else {
+    lightboxImg.src = url;
+  }
+
+  lightboxClose.focus();
+}
+
+function closeGalleryMedia() {
+  if (!lightbox) return;
+
+  lightbox.style.display = "none";
+  lightbox.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("gallery-viewer-open");
+
+  lightboxVideo.pause();
+  lightboxVideo.removeAttribute("src");
+  lightboxVideo.load();
+  lightboxImg.removeAttribute("src");
+}
+
+lightboxClose.addEventListener("click", closeGalleryMedia);
+
+lightbox.addEventListener("click", function(event) {
+  if (event.target === lightbox) closeGalleryMedia();
 });
 
-// Close using X
-closeBtn.addEventListener("click", function(e) {
-    e.stopPropagation();
-    lightbox.style.display = "none";
-    lightboxImg.src = "";
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape" && lightbox.getAttribute("aria-hidden") === "false") {
+    closeGalleryMedia();
+  }
 });
 
-// Close by clicking outside the image
-lightbox.addEventListener("click", function(e) {
-    if (e.target === lightbox) {
-        lightbox.style.display = "none";
-        lightboxImg.src = "";
-    }
-});
 
 </script>
 
