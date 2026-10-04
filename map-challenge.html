@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>KPS Harishi — India Map Challenge</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<style>
+  *{box-sizing:border-box} html,body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#172033}
+  #app{height:100%;display:flex;flex-direction:column}
+  header{background:#123b72;color:#fff;padding:10px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0} header .sub{font-size:12px;opacity:.9}
+  .stats{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{background:#fff;color:#123b72;border-radius:18px;padding:6px 10px;font-weight:700;font-size:13px}
+  main{flex:1;min-height:0;display:grid;grid-template-columns:310px 1fr;gap:8px;padding:8px}
+  aside{background:#fff;border-radius:10px;box-shadow:0 1px 5px #0002;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .controls{padding:9px;border-bottom:1px solid #e6e9ef;display:flex;gap:6px;flex-wrap:wrap}.controls button{border:0;background:#e8eef8;color:#123b72;padding:7px 9px;border-radius:7px;font-weight:700;cursor:pointer}.controls button.active{background:#123b72;color:#fff}.controls .reset{margin-left:auto;background:#dfe7ef}
+  #items{padding:8px;overflow:auto}.item{width:100%;text-align:left;border:1px solid #dbe2ec;background:#fff;border-radius:8px;padding:8px 9px;margin-bottom:6px;cursor:pointer;font-size:13px;line-height:1.2}.item:hover{background:#f4f8ff}.item.selected{border:2px solid #1d63d8;background:#eaf2ff}.item.done{opacity:.7}.item .small{font-size:10px;color:#657084;margin-top:3px}.item.correct{border-color:#159447;background:#e8f8ee}.item.wrong{border-color:#d63031;background:#fff0f0}
+  #map{height:100%;min-height:420px;border-radius:10px;box-shadow:0 1px 5px #0002;background:#dfe8ef}
+  .leaflet-container{font-family:Arial,Helvetica,sans-serif}.leaflet-control-attribution{font-size:10px}
+  .message{position:absolute;z-index:1000;left:50%;top:74px;transform:translateX(-50%);padding:9px 14px;border-radius:22px;background:#172033;color:#fff;font-weight:700;box-shadow:0 2px 8px #0004;display:none}.message.show{display:block}.message.good{background:#159447}.message.bad{background:#d63031}
+  .legend{position:absolute;right:15px;top:15px;z-index:500;background:#fff;padding:7px 9px;border-radius:8px;box-shadow:0 1px 5px #0003;font-size:11px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.blue{background:#1d63d8}.green{background:#159447}.red{background:#d63031}
+  @media(max-width:800px){main{grid-template-columns:1fr;grid-template-rows:260px 1fr}aside{min-height:0}#map{min-height:0}header h1{font-size:17px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div><h1>🇮🇳 KPS Harishi — India Map Challenge</h1><div class="sub">Select a place, then tap/click its correct location. Rivers and coasts are marked as curved lines.</div></div><div class="stats"><span class="pill" id="score">Score: 0</span><span class="pill" id="progress">0 / 90</span></div></header>
+<main>
+<aside>
+  <div class="controls" id="filters"></div>
+  <div id="items"></div>
+</aside>
+<div style="position:relative;min-width:0;min-height:0"><div id="map"></div><div class="legend"><span class="dot blue"></span>selected &nbsp; <span class="dot green"></span>correct &nbsp; <span class="dot red"></span>wrong &nbsp; <b>Rivers/Coasts = line</b></div><div id="message" class="message"></div></div>
+</main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const DATA={
+"Major Ports":[
+["Kandla",23.03,70.22],["Mumbai",18.94,72.84],["Nhava Sheva (JNPT)",18.95,72.95],["Mormugao",15.41,73.80],["New Mangaluru Port",12.91,74.86],["Kochi",9.97,76.27],["Tuticorin / Thoothukudi",8.80,78.13],["Chennai",13.08,80.27],["Visakhapatnam",17.69,83.22],["Paradip",20.27,86.70],["Kolkata",22.57,88.36],["Haldia",22.03,88.06]],
+"International Airports":[
+["Indira Gandhi International Airport",28.56,77.10],["Chhatrapati Shivaji Maharaj International Airport",19.09,72.87],["Netaji Subhas Chandra Bose International Airport",22.65,88.45],["Chennai International Airport",12.99,80.17],["Kempegowda International Airport",13.20,77.71],["Mangaluru International Airport",12.96,74.89],["Sardar Vallabhbhai Patel International Airport",23.07,72.63],["Lokpriya Gopinath Bordoloi International Airport",26.11,91.59],["Chaudhary Charan Singh International Airport",26.76,80.89],["Rajiv Gandhi International Airport",17.24,78.43],["Manohar International Airport",15.74,73.87],["Maharishi Valmiki International Airport",26.76,82.15]],
+"Coasts":[["Gujarat Coast",21.50,70.50],["Konkan Coast",17.50,73.00],["Canara Coast",14.50,74.80],["Malabar Coast",11.50,75.50],["Coromandel Coast",13.00,80.50],["Utkal Coast",19.80,85.70]],
+"River Valley Projects":[["Damodar Valley Project",23.65,86.80],["Bhakra Nangal Project — Govind Sagar",31.42,76.43],["Kosi Project",26.40,86.80],["Hirakud Project",21.53,83.87],["Tungabhadra Project — Pampasagara",15.26,76.33],["Nagarjuna Sagar Project",16.57,79.32],["Upper Krishna Project — Lal Bahadur Shastri Reservoir",16.55,75.95],["Narmada Valley Project",22.25,73.75],["Rana Pratap Sagar",24.03,73.79]],
+"Unique Geographical Locations":[["Indira Col",35.67,77.12],["Nilgiri Hills",11.40,76.70],["K2",35.88,76.51],["Anamudi",10.17,77.06],["Indira Point",6.75,93.83],["Palk Strait",9.05,79.50],["Thar Desert",27.50,71.00],["Ruyli",27.20,71.90],["Ganganagar",29.90,73.88],["Mawsynram",25.30,91.58],["Koyna",17.40,73.77],["Latur",18.41,76.56],["Kanyakumari",8.08,77.55],["Shillong",25.58,91.89],["Bombay High",19.50,71.50],["Surat",21.17,72.83],["Kaiga",14.86,74.44],["Narora",28.20,78.38],["Tarapur",19.83,72.68],["Kalpakkam",12.56,80.19]],
+"Major Industrial Centres":[["Bhadravati",13.85,75.70],["Durgapur",23.55,87.31],["Surat",21.17,72.83],["Davangere",14.47,75.92],["Bokaro",23.67,86.15],["Burnpur",23.67,87.08],["Salem",11.66,78.16],["Kanpur",26.45,80.35],["Tata Iron and Steel Industry — Jamshedpur",22.80,86.20],["Rourkela",22.25,84.88]],
+"Major Rivers":[["Ganga",25.30,83.00],["Yamuna",27.15,78.00],["Brahmaputra",26.00,91.70],["Indus",34.00,75.00],["Sutlej",31.20,76.30],["Beas",31.70,76.95],["Ravi",32.10,75.20],["Chenab",32.60,74.90],["Jhelum",34.10,74.80],["Narmada",22.50,77.70],["Tapi (Tapti)",21.30,75.00],["Godavari",18.80,80.00],["Krishna",16.50,80.60],["Tungabhadra",15.30,76.30],["Kaveri",11.90,78.70],["Mahanadi",21.00,83.80],["Sabarmati",23.00,72.60],["Luni",26.00,73.50],["Pennar",14.50,79.90],["Periyar",10.20,76.50]]
+};
+
+// Curved geographic paths used for Rivers and Coasts.
+const LINE_DATA={
+  "Coasts":{
+    "Gujarat Coast":[[22.9,68.8],[22.7,69.5],[22.3,70.1],[21.9,70.6],[21.5,71.0],[21.1,71.5],[20.7,72.0]],
+    "Konkan Coast":[[20.0,73.0],[19.2,73.1],[18.5,73.2],[17.8,73.2],[17.1,73.3],[16.4,73.5],[15.8,73.6]],
+    "Canara Coast":[[15.7,73.6],[15.2,73.7],[14.7,74.0],[14.2,74.2],[13.7,74.5],[13.2,74.7],[12.8,74.8]],
+    "Malabar Coast":[[12.8,74.8],[12.3,75.0],[11.8,75.1],[11.3,75.2],[10.8,75.4],[10.3,75.5],[9.8,75.7]],
+    "Coromandel Coast":[[12.8,80.1],[13.3,80.2],[13.9,80.2],[14.5,80.1],[15.1,80.1],[15.8,80.0],[16.5,80.0]],
+    "Utkal Coast":[[17.0,81.9],[17.5,82.2],[18.0,82.7],[18.5,83.3],[19.0,84.0],[19.5,84.8],[20.0,85.6],[20.3,86.5]]
+  },
+  "Major Rivers":{
+    "Ganga":[[30.9,78.9],[30.2,78.3],[29.5,78.0],[28.8,78.4],[27.9,79.1],[27.3,80.0],[26.7,81.0],[25.9,82.0],[25.3,83.0],[25.0,84.0],[24.6,85.0],[24.2,86.0],[23.9,87.0],[23.8,88.3]],
+    "Yamuna":[[31.0,78.5],[30.4,77.8],[29.8,77.5],[29.3,77.6],[28.8,77.9],[28.4,78.1],[27.9,77.9],[27.5,77.7],[27.0,77.6],[26.4,77.9],[25.8,78.2],[25.3,79.0],[25.0,80.0],[25.3,81.0]],
+    "Brahmaputra":[[29.5,94.7],[28.8,95.0],[28.1,95.5],[27.5,96.0],[27.0,95.8],[26.7,94.8],[26.4,93.8],[26.2,92.8],[26.0,91.8],[25.8,91.0],[25.4,90.0],[25.0,89.0],[24.8,88.0]],
+    "Indus":[[34.8,77.5],[34.4,77.0],[34.1,76.5],[33.8,76.0],[33.4,75.7],[32.9,75.5],[32.3,75.4],[31.8,75.2],[31.2,75.0],[30.7,74.8]],
+    "Sutlej":[[31.5,78.0],[31.4,77.5],[31.4,77.0],[31.3,76.6],[31.2,76.3],[31.1,76.0],[30.9,75.7],[30.7,75.4]],
+    "Beas":[[32.0,77.2],[31.8,76.9],[31.7,76.7],[31.7,76.5],[31.6,76.3],[31.5,76.1],[31.4,75.9],[31.2,75.8]],
+    "Ravi":[[32.6,76.6],[32.5,76.3],[32.3,76.0],[32.1,75.7],[32.0,75.4],[31.9,75.1],[31.8,74.9]],
+    "Chenab":[[33.0,76.8],[32.8,76.4],[32.6,76.0],[32.5,75.6],[32.3,75.2],[32.2,74.9],[32.0,74.7]],
+    "Jhelum":[[34.2,74.8],[34.0,74.4],[33.8,74.0],[33.6,73.8],[33.4,73.7],[33.2,73.8],[33.0,74.0]],
+    "Narmada":[[22.7,81.8],[22.6,81.0],[22.6,80.2],[22.5,79.4],[22.4,78.6],[22.3,77.8],[22.2,76.9],[22.1,76.0],[21.9,75.1],[21.7,74.2],[21.6,73.4],[21.6,72.8]],
+    "Tapi (Tapti)":[[21.9,78.3],[21.8,77.7],[21.6,77.1],[21.5,76.5],[21.4,75.9],[21.3,75.3],[21.2,74.7],[21.1,74.1],[21.0,73.5],[21.0,72.9]],
+    "Godavari":[[19.9,77.5],[19.7,78.0],[19.5,78.5],[19.3,79.0],[19.2,79.5],[19.0,80.0],[18.8,80.6],[18.7,81.2],[18.6,82.0],[17.9,82.6],[17.4,82.8]],
+    "Krishna":[[18.0,73.6],[17.8,74.2],[17.5,74.8],[17.2,75.4],[16.9,76.0],[16.7,76.7],[16.5,77.4],[16.4,78.2],[16.4,79.0],[16.5,79.8],[16.7,80.6]],
+    "Tungabhadra":[[14.8,75.7],[15.0,76.0],[15.2,76.3],[15.3,76.7],[15.5,77.1],[15.6,77.5],[15.8,77.9],[16.0,78.3]],
+    "Kaveri":[[12.4,75.7],[12.2,76.1],[12.0,76.5],[11.9,77.0],[11.8,77.5],[11.7,78.0],[11.8,78.5],[11.9,79.0],[11.9,79.5]],
+    "Mahanadi":[[22.6,82.0],[22.4,82.5],[22.2,83.0],[21.9,83.4],[21.6,83.8],[21.4,84.2],[21.3,84.7],[21.2,85.2],[21.1,85.7],[20.9,86.2]],
+    "Sabarmati":[[24.8,73.7],[24.4,73.6],[24.0,73.4],[23.6,73.2],[23.3,72.9],[23.0,72.6],[22.7,72.5],[22.4,72.6],[22.2,72.7]],
+    "Luni":[[26.8,74.6],[26.5,74.5],[26.2,74.3],[25.9,74.0],[25.6,73.7],[25.3,73.4],[25.0,73.1],[24.8,72.8]],
+    "Pennar":[[14.0,77.8],[14.2,78.1],[14.4,78.5],[14.5,78.9],[14.4,79.3],[14.3,79.7],[14.2,80.0],[14.0,80.3]],
+    "Periyar":[[10.9,77.0],[10.7,76.8],[10.5,76.6],[10.3,76.5],[10.1,76.4],[9.9,76.4],[9.7,76.5]]
+  }
+};
+const COLORS={"Major Ports":"#0066cc","International Airports":"#7b2cbf","Coasts":"#d97706","River Valley Projects":"#15803d","Unique Geographical Locations":"#be185d","Major Industrial Centres":"#334155","Major Rivers":"#0891b2"};
+const map=L.map('map',{zoomControl:true,minZoom:4,maxZoom:10,preferCanvas:true}).setView([22.5,79.0],5);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri — Esri, HERE, Garmin, FAO, NOAA, USGS, OpenStreetMap contributors, and the GIS User Community'}).addTo(map);
+// Thick India national border overlay (real geographic boundary data; no labels).
+fetch('https://raw.githubusercontent.com/datameet/maps/master/Country/india-composite.geojson')
+  .then(r=>r.json())
+  .then(geo=>{
+    window.indiaBorderLayer=L.geoJSON(geo,{
+      interactive:false,
+      style:{color:'#123b72',weight:5,opacity:1,fill:false,lineCap:'round',lineJoin:'round'}
+    }).addTo(map);
+    window.indiaBorderLayer.bringToFront();
+  })
+  .catch(()=>{});
+const bounds=L.latLngBounds([[5,68],[36.5,98.5]]); map.setMaxBounds(bounds.pad(.25));
+let all=[]; for(const [cat,arr] of Object.entries(DATA)) arr.forEach(x=>all.push({cat,name:x[0],lat:x[1],lng:x[2]}));
+let current=null,score=0,done=new Set(),filter='All',markers=[],selectedMarker=null,activeLine=null;
+const filters=document.getElementById('filters'); const items=document.getElementById('items'); const scoreEl=document.getElementById('score'); const progressEl=document.getElementById('progress'); const msg=document.getElementById('message');
+function toast(text,good){msg.textContent=text;msg.className='message show '+(good?'good':'bad');clearTimeout(window._toast);window._toast=setTimeout(()=>msg.className='message',1000)}
+function categoryColor(cat){return COLORS[cat]||'#1d63d8'}
+function makeIcon(color,fill){return L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:${fill||color};border:3px solid #fff;box-shadow:0 1px 5px #0007"></div>`,iconSize:[18,18],iconAnchor:[9,9]})}
+function buildFilters(){filters.innerHTML=''; ['All',...Object.keys(DATA)].forEach(cat=>{let b=document.createElement('button');b.textContent=cat;b.className=filter===cat?'active':'';b.onclick=()=>{filter=cat;buildFilters();renderItems()};filters.appendChild(b)});let r=document.createElement('button');r.textContent='Reset';r.className='reset';r.onclick=reset;filters.appendChild(r)}
+function renderItems(){items.innerHTML='';const arr=all.filter(x=>filter==='All'||x.cat===filter);arr.forEach(x=>{let b=document.createElement('button');b.className='item '+(current===x?'selected ':'')+(done.has(x.name)?'done ':'');b.innerHTML=`<b>${x.name}</b><div class="small">${x.cat}</div>`;b.onclick=()=>selectItem(x);items.appendChild(b)});progressEl.textContent=`${done.size} / ${all.length}`}
+function selectItem(x){current=x;if(selectedMarker){map.removeLayer(selectedMarker);selectedMarker=null}if(activeLine){map.removeLayer(activeLine);activeLine=null}if(LINE_DATA[x.cat]&&LINE_DATA[x.cat][x.name]){map.setView([x.lat,x.lng],Math.max(map.getZoom(),6));toast('Now tap/click on the correct river/coast line.',true)}else{selectedMarker=L.marker([x.lat,x.lng],{icon:makeIcon('#1d63d8','#1d63d8'),opacity:.18}).addTo(map);toast('Now tap/click the correct location on the map.',true)}renderItems()}
+function addResultMarker(lat,lng,good){L.circleMarker([lat,lng],{radius:8,color:'#fff',weight:2,fillColor:good?'#159447':'#d63031',fillOpacity:.95}).addTo(map)}
+function reset(){score=0;done.clear();current=null;if(selectedMarker){map.removeLayer(selectedMarker);selectedMarker=null}if(activeLine){map.removeLayer(activeLine);activeLine=null}map.eachLayer(l=>{if(l instanceof L.CircleMarker)map.removeLayer(l)});scoreEl.textContent='Score: 0';renderItems();toast('Activity reset.',true);map.setView([22.5,79],5)}
+map.on('click',e=>{
+  if(!current){toast('First select a place from the list.',false);return}
+  const path=LINE_DATA[current.cat]?.[current.name];
+  let d;
+  if(path){
+    d=Infinity;
+    for(let i=0;i<path.length-1;i++){
+      const a=L.latLng(path[i][0],path[i][1]),b=L.latLng(path[i+1][0],path[i+1][1]);
+      const steps=12;
+      for(let j=0;j<=steps;j++){
+        const t=j/steps, q=L.latLng(a.lat+(b.lat-a.lat)*t,a.lng+(b.lng-a.lng)*t);
+        d=Math.min(d,map.distance(e.latlng,q)/1000);
+      }
+    }
+  }else{d=map.distance(e.latlng,L.latLng(current.lat,current.lng))/1000}
+  const threshold=path?(current.cat==='Coasts'?70:85):110;
+  const good=d<=threshold;
+  if(good && path){
+    if(activeLine)map.removeLayer(activeLine);
+    activeLine=L.polyline(path,{color:'#159447',weight:6,opacity:.9,lineCap:'round',lineJoin:'round'}).addTo(map);
+  }else{
+    addResultMarker(e.latlng.lat,e.latlng.lng,good);
+  }
+  if(good){score+=10;done.add(current.name);toast('✓ Correct!',true)}
+  else{score=Math.max(0,score-2);toast(`✗ Wrong — about ${Math.round(d)} km away. Try again.`,false)}
+  scoreEl.textContent=`Score: ${score}`;renderItems();
+});
+buildFilters();renderItems();
+</script>
+</body>
+</html>
