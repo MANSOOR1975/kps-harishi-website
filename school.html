@@ -270,6 +270,16 @@ footer p{margin:7px 0}
 .lightbox-close:hover{background:#eaf3fb}
 body.gallery-viewer-open{overflow:hidden}
 
+
+/* Visitor counter */
+.visitor-counter{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:14px;padding:9px 16px;border-radius:999px;
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);
+  font-size:14px;font-weight:700;color:#fff;
+}
+.visitor-counter strong{color:#ffe082;font-size:16px}
+
 </style>
 
     <meta name="google-site-verification" content="RbeLVJYxBs1ZLh8S5-pKLnDuijlfHWYMMG_H7L233ro" />
@@ -414,6 +424,7 @@ body.gallery-viewer-open{overflow:hidden}
 <footer>
   <p><strong>KPS Harishi</strong></p>
   <p>Better Learning, Bright Future</p>
+  <div class="visitor-counter" aria-live="polite">👁️ Visitors: <strong id="visitorCount">Loading...</strong></div>
 </footer>
 
 
@@ -1075,10 +1086,43 @@ function escapeHtml(value) {
 
 
 /* =========================
+   VISITOR COUNTER
+   Counts one anonymous browser/device once and updates its last visit.
+   Requires the Supabase SQL setup supplied with this update.
+========================= */
+async function recordVisitor() {
+  const counter = document.getElementById("visitorCount");
+  if (!counter) return;
+
+  try {
+    let visitorId = localStorage.getItem("kps_harishi_visitor_id");
+    if (!visitorId) {
+      if (window.crypto && crypto.randomUUID) {
+        visitorId = crypto.randomUUID();
+      } else {
+        visitorId = "v-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+      }
+      localStorage.setItem("kps_harishi_visitor_id", visitorId);
+    }
+
+    const { data, error } = await sb.rpc("record_site_visit", {
+      p_visitor_id: visitorId
+    });
+
+    if (error) throw error;
+    counter.textContent = Number(data || 0).toLocaleString("en-IN");
+  } catch (error) {
+    console.warn("Visitor counter unavailable:", error.message);
+    counter.textContent = "—";
+  }
+}
+
+/* =========================
    START
 ========================= */
 
 loadWelcomeMessage();
+recordVisitor();
   loadHomepageBackgrounds();
 loadStaff();
 loadGallery();
